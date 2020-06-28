@@ -752,12 +752,17 @@ def log(wrong,type): #log file generator
 
 
 if __name__=='__main__':
-    import ctypes
-    myappid = 'hys.wordtest2'
-    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
-    app = QApplication(sys.argv)
-    app.setWindowIcon(QIcon(CURRENT_DIR+'icon.png'))
-    SCALE=tools.scale()
-    selui=selectWin()
-    selui.show()
-    app.exec_()
+    if '-c' in sys.argv:
+        os.system('start /min "DO NOT CLOSE This Command Prompt, Otherwise wordtest will be KILLED" cmd /c py wordtest.pyw')
+    elif '-C' in sys.argv:
+        os.system('start /min "DO NOT CLOSE This Command Prompt, Otherwise wordtest will be KILLED" cmd /k py wordtest.pyw')
+    else:
+        import ctypes
+        myappid = 'hys.wordtest2'
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+        app = QApplication(sys.argv)
+        app.setWindowIcon(QIcon(CURRENT_DIR+'icon.png'))
+        SCALE=tools.scale()
+        selui=selectWin()
+        selui.show()
+        app.exec_()

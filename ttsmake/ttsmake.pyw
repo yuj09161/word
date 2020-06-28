@@ -230,7 +230,7 @@ class Make(MakeUI,QMainWindow):
 
 
 if __name__=='__main__':
-    if '-c' in sys.argv:
+    if '-q' in sys.argv:
         import ctypes
         myappid='hys.ttsmake'
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
@@ -240,5 +240,7 @@ if __name__=='__main__':
         m=Make()
         m.show()
         sys.exit(app.exec_())
+    elif '-C' in sys.argv:
+        os.system('start /min "DO NOT CLOSE This Command Prompt, Otherwise TTS Maker will be KILLED" cmd /k py ttsmake.pyw -q')
     else:
-        os.system('start /min "DO NOT CLOSE This Command Prompt, Otherwise TTS Maker will be KILLED" cmd /c py ttsmake.pyw -c')
+        os.system('start /min "DO NOT CLOSE This Command Prompt, Otherwise TTS Maker will be KILLED" cmd /c py ttsmake.pyw -q')
