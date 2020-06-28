@@ -1,0 +1,1 @@
+@cmd /k cd /d C:\Users\HYS\Desktop\word\tools\
