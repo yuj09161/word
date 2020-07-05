@@ -15,7 +15,6 @@ sys.path.append(os.path.abspath(CURRENT_DIR+'..'))
 from UI import PlayUI
 from commons import tools
 
-CURRENT_DIR=os.path.dirname(os.path.abspath(__file__))+'\\'
 WORD_DIR,_,RETEST_DIR,SOUND_DIR,_=tools.get_path(CURRENT_DIR)
 
 try:

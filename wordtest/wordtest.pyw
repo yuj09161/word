@@ -9,6 +9,9 @@ from PySide2.QtWidgets import *
 
 import os,sys,random,datetime,re
 
+CURRENT_DIR=os.path.dirname(os.path.abspath(__file__))+'\\'
+sys.path.append(os.path.abspath(CURRENT_DIR+'..'))
+
 from UI import SelectUI,SettingUI,TestUI,SelectTestUI
 from commons import tools
 
@@ -18,7 +21,6 @@ check_word   = ('do','sb','sth')
 ckeck_symbol = ('(','[','~','...','.')
 setting_closed=True
 
-CURRENT_DIR=os.path.dirname(os.path.abspath(__file__))+'\\'
 WORD_DIR,LOG_DIR,RETEST_DIR,_,_=tools.get_path(CURRENT_DIR)
 
 SHOW_TIME=1; SKIP_TIME=2; TMR_INTERVAL=25; TIME_YES=1000; TIME_NO=2000
