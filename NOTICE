@@ -1,0 +1,13 @@
+#####Open-Source Software Notice#####
+
+This Software may use another Open-Source programs listed below.
+
+Python by PSF(Python Software Foundation): PSF License(Python Software Foundation License)
+
+PySide2 by The Qt Company: LGPL(GNU Lesser General Public License)
+
+pygame by pygame community: LGPL(GNU Lesser General Public License)
+
+pydub by James Robert: MIT License
+
+gtts by Pierre Nicolas Durette: MIT License
