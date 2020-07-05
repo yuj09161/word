@@ -1,8 +1,9 @@
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QDialog
 
-from win32api import GetSystemMetrics
-import os,sys
+import os,sys,ctypes
+
+GetSystemMetrics=ctypes.windll.user32.GetSystemMetrics
 
 RESOL=(GetSystemMetrics(0),GetSystemMetrics(1))
 
