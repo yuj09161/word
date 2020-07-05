@@ -9,9 +9,6 @@ from PySide2.QtWidgets import *
 
 import os,sys,random,datetime,re
 
-CURRENT_DIR=os.path.dirname(os.path.abspath(__file__))+'\\'
-sys.path.append(os.path.abspath(CURRENT_DIR+'..'))
-
 from UI import SelectUI,SettingUI,TestUI,SelectTestUI
 from commons import tools
 
@@ -166,9 +163,6 @@ class settingWin(QDialog, SettingUI):
         #self.btnCancel.clicked.connect(self.__cancel)
         self.btnApply.clicked.connect(self.__apply)
         self.btnStart.clicked.connect(self.__start)
-    
-    def __exam(self):
-        pass
     
     def __short_answer(self):
         self.__exam_type=SHORT_ANSWER
