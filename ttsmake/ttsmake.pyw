@@ -12,7 +12,7 @@ sys.path.append(os.path.abspath(CURRENT_DIR+'..'))
 from UI import MakeUI
 from commons import tools
 
-SPEED_K=1.3; ADD_ALL=False
+SPEED_K=1.3; ADD_ALL=False; TMPFILE=CURRENT_DIR+'tmp.mp3'
 
 WORD_DIR,_,_,SOUND_DIR,TTS_DIR=tools.get_path(CURRENT_DIR)
 
@@ -129,13 +129,19 @@ class Make(MakeUI,QMainWindow):
         self.pgC.setRange(0,0)
         threading.Thread(target=self.__worker_manual,kwargs={'mode':mod,'text':self.lnToTts.text(),'out_path':path}).start()
     
-    def __eng(self,text):
-        return tts(text,lang='en')
+    def __eng(self,text,out_path):
+        #return tts(text,lang='en')
+        with open(out_path,'wb') as out_file:
+            #self.__eng(word[0]).write_to_fp(out_file)
+            tts(text,lang='en').write_to_fp(out_path)
     
-    def __kor(self,text):
-        return tts(text,lang='ko')
+    def __kor(self,text,out_path):
+        #return tts(text,lang='ko')
+        with open(out_path,'wb') as out_file:
+            #self.__kor(word[0]).write_to_fp(out_file)
+            tts(text,lang='ko').write_to_fp(out_path)
     
-    def __worker(self,mode):
+    def __worker(self,do_work):
         #clear log
         self.pteLog.setPlainText('')
         
@@ -159,7 +165,7 @@ class Make(MakeUI,QMainWindow):
             words,_=tools.parsing(path)
             length=int(len(words))
             self.__signal.p.emit((words,length))
-            if mode:
+            if do_work:
                 #set progress bar
                 self.__signal.n.emit((201,length))
                 #make sound file
@@ -170,25 +176,36 @@ class Make(MakeUI,QMainWindow):
                         self.__signal.n.emit((i,k))
                         name=os.path.splitext(os.path.basename(path))[0]
                         out_l=tools.safe_set_path(SOUND_DIR+name)+str(k)
-                        tmp_file=CURRENT_DIR+'tmp.mp3'
-                        with open(out_l+'_e.mp3','wb') as out_file:
-                            self.__eng(word[0]).write_to_fp(out_file)
-                        with open(tmp_file,'wb') as out_file:
-                            self.__kor(word[1]).write_to_fp(out_file)
-                        app.processEvents()
-                        effects.speedup(AudioSegment.from_mp3(tmp_file),SPEED_K).export(out_l+'_k.mp3',format="mp3", bitrate='32k')
+                        if word[0]:
+                            self.__eng(word[0],out_l+'_e.mp3')
+                            '''
+                            with open(out_l+'_e.mp3','wb') as out_file:
+                                self.__eng(word[0]).write_to_fp(out_file)
+                            '''
+                        if word[1]:
+                            self.__kor(word[1],TMPFILE)
+                            '''
+                            with open(TMPFILE,'wb') as out_file:
+                                self.__kor(word[1]).write_to_fp(out_file)
+                            '''
+                            #app.processEvents()
+                            effects.speedup(AudioSegment.from_mp3(TMPFILE),SPEED_K).export(out_l+'_k.mp3',format="mp3", bitrate='32k')
                         self.__signal.p.emit((name,': ',k,'/',length))
-                        app.processEvents()
+                        #app.processEvents()
                         k+=1
                     else:
                         self.__signal.p.emit(('#####Force Stop#####',))
                         self.__signal.n.emit((102,0))
+                        if os.path.isfile(TMPFILE):
+                            os.remove(TMPFILE)
                         return
+                if os.path.isfile(TMPFILE):
+                    os.remove(TMPFILE)
                 self.__signal.p.emit(('end\n',))
                 i+=1
         #end work
         
-        if not mode:    
+        if not do_work:    
             self.__signal.p.emit(('All names:',[os.path.basename(p) for p in paths]))
             return
         else:
@@ -201,14 +218,21 @@ class Make(MakeUI,QMainWindow):
         try:
             if mode:
                 self.__signal.p.emit(('English...',))
+                self.__eng(word[0],out_path)
+                '''
                 with open(out_path,'wb') as file:
                     self.__eng(text).write_to_fp(file)
+                '''
             else:
                 self.__signal.p.emit(('Korean...',))
-                with open(CURRENT_DIR+'tmp.mp3','wb') as file:
+                self.__kor(word[1],TMPFILE)
+                '''
+                with open(TMPFILE,'wb') as file:
                     self.__kor(text).write_to_fp(file)
-                effects.speedup(AudioSegment.from_mp3(CURRENT_DIR+'tmp.mp3'),SPEED_K).export(out_path,format="mp3", bitrate='32k')
-                os.remove(CURRENT_DIR+'tmp.mp3')
+                '''
+                effects.speedup(AudioSegment.from_mp3(TMPFILE),SPEED_K).export(out_path,format="mp3", bitrate='32k')
+                if os.path.isfile(TMPFILE):
+                    os.remove(TMPFILE)
         except Exception as e:
             self.__signal.p.emit(('An Error Occured\nTraceback:\n%s' %e,))
         else:
