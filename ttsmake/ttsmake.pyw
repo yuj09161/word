@@ -133,13 +133,13 @@ class Make(MakeUI,QMainWindow):
         #return tts(text,lang='en')
         with open(out_path,'wb') as out_file:
             #self.__eng(word[0]).write_to_fp(out_file)
-            tts(text,lang='en').write_to_fp(out_path)
+            tts(text,lang='en').write_to_fp(out_file)
     
     def __kor(self,text,out_path):
         #return tts(text,lang='ko')
         with open(out_path,'wb') as out_file:
             #self.__kor(word[0]).write_to_fp(out_file)
-            tts(text,lang='ko').write_to_fp(out_path)
+            tts(text,lang='ko').write_to_fp(out_file)
     
     def __worker(self,do_work):
         #clear log
@@ -218,14 +218,14 @@ class Make(MakeUI,QMainWindow):
         try:
             if mode:
                 self.__signal.p.emit(('English...',))
-                self.__eng(word[0],out_path)
+                self.__eng(text,out_path)
                 '''
                 with open(out_path,'wb') as file:
                     self.__eng(text).write_to_fp(file)
                 '''
             else:
                 self.__signal.p.emit(('Korean...',))
-                self.__kor(word[1],TMPFILE)
+                self.__kor(text,TMPFILE)
                 '''
                 with open(TMPFILE,'wb') as file:
                     self.__kor(text).write_to_fp(file)
