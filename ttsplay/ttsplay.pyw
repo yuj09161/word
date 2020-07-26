@@ -44,6 +44,7 @@ class PlayUI(QMainWindow,PlayUI):
             for dir in (WORD_DIR,RETEST_DIR):
                 tmp1,tmp2=tools.get_file(dir)
                 names+=tmp1; self.__files+=tmp2
+            self.comboName.clear()
             self.comboName.addItems(names)
             self.__refresh_mode=2
             self.__setFile()
@@ -71,7 +72,7 @@ class PlayUI(QMainWindow,PlayUI):
                     self.btnSet.setStyleSheet('color: blue')
             else:
                 self.__refresh_mode=0
-                self.btnSet.setStyleSheet('color: black')
+                self.btnSet.setStyleSheet('')
                 self.btnSet.setEnabled(False)
         
         def cell_click_trigger(a):
@@ -117,7 +118,7 @@ class PlayUI(QMainWindow,PlayUI):
         if self.__refresh_mode==1:
             self.__repeat=self.spinNum.value()
             self.pgBar.setRange(0,self.__length*self.__repeat)
-            self.btnSet.setStyleSheet('color: black')
+            self.btnSet.setStyleSheet('')
             self.btnSet.setEnabled(False)
         elif self.__refresh_mode==2:
             #get count,filename,words
@@ -173,7 +174,7 @@ class PlayUI(QMainWindow,PlayUI):
                     self.__path.append(SOUND_DIR+names[k]+'_k.mp3')
                 
             self.__refresh_mode=0
-            self.btnSet.setStyleSheet('color: black')
+            self.btnSet.setStyleSheet('')
             self.btnSet.setEnabled(False)
             
     
@@ -219,7 +220,7 @@ class PlayUI(QMainWindow,PlayUI):
         if not self.__isStop:
             if self.__isPause:
                 self.__isPause=False
-                self.btnPause.setStyleSheet('color: black')
+                self.btnPause.setStyleSheet('')
             else:
                 self.__isPause=True
                 mixer.music.stop()
@@ -235,7 +236,7 @@ class PlayUI(QMainWindow,PlayUI):
         else:
             self.pgBar.reset()
             self.btnPause.setEnabled(False)
-            self.btnPause.setStyleSheet('color: black')
+            self.btnPause.setStyleSheet('')
             if move:
                 self.twWord.setCurrentCell(0,0)
                 self.twWord.setCurrentCell(0,3)
@@ -248,7 +249,7 @@ class PlayUI(QMainWindow,PlayUI):
         #if not word
         if not len(args)>0:
             raise ValueError
-        #set initial column
+        #set manual flag
         if 'manual' in kwarg_list:
             assert type(kwargs['manual']) is bool
             manual=kwargs['manual']

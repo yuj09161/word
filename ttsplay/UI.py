@@ -120,7 +120,7 @@ class PlayUI(object):
         self.gbFile.setTitle("")
         self.lbFileName.setText(QCoreApplication.translate("Dialog", u"FileName: ", None))
         self.lbRepeat.setText(QCoreApplication.translate("Dialog", u"Repeat: ", None))
-        self.btnSet.setText(QCoreApplication.translate("Dialog", u"Set and Stop", None))
+        self.btnSet.setText(QCoreApplication.translate("Dialog", u"Set / Stop", None))
         self.btnPause.setText(QCoreApplication.translate("Dialog", u"\u2016", None))
         self.btnMore.setText(QCoreApplication.translate("Dialog", u">>", None))
         self.btnStartStop.setText(QCoreApplication.translate("Dialog", 'u"\u25b6"', None))

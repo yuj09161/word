@@ -15,15 +15,29 @@ sys.path.append(os.path.abspath(CURRENT_DIR+'..'))
 from UI import SelectUI,SettingUI,TestUI,SelectTestUI
 from commons import tools
 
+#define constant
 SHORT_ANSWER=0; CHOICE=1
-testwin=None; fileName=[]; words=[]; seq=[]; masks={}; settings={}
+
+#define global variable
+testwin=None
+fileName=[]
+words=[]
+seq=[]
+masks={}
+settings={}
+
+#define setting
+SHOW_TIME=1
+SKIP_TIME=2
+TMR_INTERVAL=25
+TIME_YES=1000
+TIME_NO=2000
 check_word   = ('do','sb','sth')
 ckeck_symbol = ('(','[','~','...','.')
 setting_closed=True
 
+#get dir
 WORD_DIR,LOG_DIR,RETEST_DIR,_,_=tools.get_path(CURRENT_DIR)
-
-SHOW_TIME=1; SKIP_TIME=2; TMR_INTERVAL=25; TIME_YES=1000; TIME_NO=2000
 
 class selectWin(QMainWindow,SelectUI):
     def __init__(self):
@@ -759,6 +773,7 @@ if __name__=='__main__':
         app = QApplication(sys.argv)
         app.setWindowIcon(QIcon(CURRENT_DIR+'icon.png'))
         SCALE=tools.scale()
+        #SCALE=1
         selui=selectWin()
         selui.show()
         app.exec_()
