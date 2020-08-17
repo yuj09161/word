@@ -1,5 +1,5 @@
 from PySide2.QtCore import (QCoreApplication, QMetaObject, QObject, QPoint,
-    QRect, QSize, QUrl, Qt, Signal, Slot)
+    QRect, QSize, QUrl, Qt, Signal, Slot, QLocale)
 from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont,
     QFontDatabase, QIcon, QLinearGradient, QPalette, QPainter, QPixmap,
     QRadialGradient, QGuiApplication)
@@ -95,6 +95,7 @@ class PlayUI(QMainWindow,PlayUI):
         self.__rev=False
         self.__refresh_mode=2
         self.__r=0
+        self.__is_play_sapi=True
         
         set_path()
         
@@ -206,7 +207,10 @@ class PlayUI(QMainWindow,PlayUI):
     def __start(self,*,n=0):
         self.__isStop=False; self.__isPause=False
         self.btnPause.setEnabled(True)
-        threading.Thread(target=self.__play,args=(self.__path,),kwargs={'col':n,'manual':False},daemon=True).start()
+        if self.__is_play_sapi:
+            threading.Thread(target=self.__play_sapi,daemon=True).start()
+        else:
+            threading.Thread(target=self.__play,args=(self.__path,),kwargs={'col':n,'manual':False},daemon=True).start()
         tools.reconnect(self.btnStartStop.clicked,self.__stop)
         self.btnStartStop.setText(u'\u25a0')
     
@@ -295,8 +299,41 @@ class PlayUI(QMainWindow,PlayUI):
                 self.__n=0; self.__r+=1
             self.__trigger.s.emit((101,0))
     
+    def __play_sapi(self):
+        r=0
+        
+        tts_en=qtts()
+        tts_ko=qtts()
+        tts_en.setLocale(QLocale(QLocale.English))
+        tts_ko.setLocale(QLocale(QLocale.Korean))
+        
+        for word in self.__words:
+            print(self.__words[r])
+            if self.__isStop:
+                self.__trigger.s.emit((101,0))
+                break
+            elif self.__isPause:
+                while self.__isPause:
+                    time.sleep(0.5)
+            self.__trigger.s.emit((0,r*2))
+            tts_en.say(word[0])
+            print(tts_en.state())
+            time.sleep(3)
+            '''
+            while tts_en.state()==qtts.State.Speaking:
+                time.sleep(1)
+            '''
+            self.__trigger.s.emit((0,r*2+1))
+            tts_ko.say(word[1])
+            time.sleep(3)
+            '''
+            while tts_ko.state()==qtts.State.Speaking:
+                time.sleep(1)
+            '''
+            r+=1
+        self.__trigger.s.emit((101,0))
+    
     def __worker(self,*args,**kargs):
-        from pydub import AudioSegment
         names=args[0]
         res=AudioSegment.from_mp3(names[0])
         n=1
