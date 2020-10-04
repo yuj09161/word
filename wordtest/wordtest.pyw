@@ -770,10 +770,14 @@ if __name__=='__main__':
         import ctypes
         myappid = 'hys.wordtest2'
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+        
         app = QApplication(sys.argv)
         app.setWindowIcon(QIcon(CURRENT_DIR+'icon.png'))
-        SCALE=tools.scale()
+        
+        SCALE=tools.scale(app)
         #SCALE=1
+        
         selui=selectWin()
         selui.show()
-        app.exec_()
+        
+        sys.exit(app.exec_())

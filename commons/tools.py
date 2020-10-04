@@ -1,5 +1,5 @@
 from PySide2.QtCore import Qt
-from PySide2.QtWidgets import QDialog
+from PySide2.QtWidgets import QMainWindow
 
 import os,sys,ctypes
 
@@ -7,22 +7,36 @@ GetSystemMetrics=ctypes.windll.user32.GetSystemMetrics
 
 RESOL=(GetSystemMetrics(0),GetSystemMetrics(1))
 
-class Get_Scale(QDialog):
-    def __init__(self):
-        super().__init__()
-        self.hide()
-        self.setWindowFlags(Qt.FramelessWindowHint)
-        self.showFullScreen()
-        self.__size=(self.size().width(),self.size().height())
-        self.hide()
+class Get_Scale(QMainWindow):
+    def __init__(self,app,wid):
+        if app and wid:
+            tmp=app.desktop().screenGeometry(wid)
+            self.__size=(tmp.width(),tmp.height())
+        else:
+            super().__init__()
+            self.setWindowFlags(Qt.FramelessWindowHint)
+            self.setStyleSheet('background:transparent')
+            
+            if app:
+                self.setGeometry(0,0,1,1)
+                self.show()
+                tmp=app.desktop().screenGeometry(self)
+                self.__size=(tmp.width(),tmp.height())
+            else:
+                self.showFullScreen()
+                self.__size=(self.size().width(),self.size().height())
+            
+            self.destroy()
     
     def get_resol(self):
         return self.__size
+
 
 def safe_set_path(name):
     if not os.path.isdir(name):
         os.mkdir(name)
     return name+'\\'
+
 
 def get_path(current_dir):
     safe_set_path(current_dir+'..\\resources')
@@ -33,20 +47,22 @@ def get_path(current_dir):
     TTS_DIR    = safe_set_path(current_dir+'..\\resources\\ttsWords')
     return (WORD_DIR,LOG_DIR,RETEST_DIR,SOUND_DIR,TTS_DIR)
 
-def scale():
-    scale_win=Get_Scale()
+
+def scale(app=None,wid=None,base=1.25):
+    scale_win=Get_Scale(app,wid)
     size=scale_win.get_resol()
-    scale_win.destroy()
-    return size[0]/RESOL[0]/1.25 if size[0]/RESOL[0]==size[1]/RESOL[1] else 1
+    return size[0]/RESOL[0]/base if size[0]/RESOL[0]==size[1]/RESOL[1] else 1
 
 #reconnect pyqt5/pyside2 signal
 #obj: must be a signal, not QObject
+
 def reconnect(obj,newCmd):
     try:
         obj.disconnect()
     except:
         pass
     obj.connect(newCmd)
+
 
 def get_file(dir):
     names=[]; full_paths=[]
@@ -57,6 +73,7 @@ def get_file(dir):
             names.append(file)
             full_paths.append(full_path)
     return names,full_paths
+
 
 def parsing(file_path):
     #file read
@@ -70,6 +87,7 @@ def parsing(file_path):
             res.append(tuple(tmp[:2]))
             mask.append(tuple(tmp[2:4]))
     return tuple(res),tuple(mask)
+
 
 def duplicate_remove(hashable,iter_seq=None,*,tuple_out=True):
     res=list(set(hashable)) #duplicate remove
