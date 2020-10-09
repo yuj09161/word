@@ -371,9 +371,13 @@ if __name__=='__main__':
         import ctypes
         myappid = 'hys.ttsplay'
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+        
         app=QApplication()
         app.setWindowIcon(QIcon(CURRENT_DIR+'icon.png'))
-        SCALE=tools.scale()
+        
+        SCALE=tools.scale(app.desktop)
+        
         playui=PlayUI()
         playui.show()
-        app.exec_()
+        
+        sys.exit(app.exec_())

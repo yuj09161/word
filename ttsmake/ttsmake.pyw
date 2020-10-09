@@ -258,11 +258,15 @@ if __name__=='__main__':
         import ctypes
         myappid='hys.ttsmake'
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+        
         app=QApplication()
         app.setWindowIcon(QIcon(CURRENT_DIR+'icon.png'))
-        SCALE=tools.scale()
-        m=Make()
-        m.show()
+        
+        SCALE=tools.scale(app.desktop)
+        
+        make=Make()
+        make.show()
+        
         sys.exit(app.exec_())
     elif '-C' in sys.argv:
         os.system('start /min "DO NOT CLOSE This Command Prompt, Otherwise TTS Maker will be KILLED" cmd /k py ttsmake.pyw -q')

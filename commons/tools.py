@@ -8,9 +8,9 @@ GetSystemMetrics=ctypes.windll.user32.GetSystemMetrics
 RESOL=(GetSystemMetrics(0),GetSystemMetrics(1))
 
 class Get_Scale(QMainWindow):
-    def __init__(self,app,wid):
+    def __init__(self,app_desktop,wid):
         if app and wid:
-            tmp=app.desktop().screenGeometry(wid)
+            tmp=app_desktop().screenGeometry(wid)
             self.__size=(tmp.width(),tmp.height())
         else:
             super().__init__()
@@ -20,7 +20,7 @@ class Get_Scale(QMainWindow):
             if app:
                 self.setGeometry(0,0,1,1)
                 self.show()
-                tmp=app.desktop().screenGeometry(self)
+                tmp=app_desktop().screenGeometry(self)
                 self.__size=(tmp.width(),tmp.height())
             else:
                 self.showFullScreen()
@@ -55,7 +55,6 @@ def scale(app=None,wid=None,base=1.25):
 
 #reconnect pyqt5/pyside2 signal
 #obj: must be a signal, not QObject
-
 def reconnect(obj,newCmd):
     try:
         obj.disconnect()

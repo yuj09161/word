@@ -774,8 +774,7 @@ if __name__=='__main__':
         app = QApplication(sys.argv)
         app.setWindowIcon(QIcon(CURRENT_DIR+'icon.png'))
         
-        SCALE=tools.scale(app)
-        #SCALE=1
+        SCALE=tools.scale(app.desktop)
         
         selui=selectWin()
         selui.show()
