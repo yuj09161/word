@@ -8,23 +8,28 @@ GetSystemMetrics=ctypes.windll.user32.GetSystemMetrics
 RESOL=(GetSystemMetrics(0),GetSystemMetrics(1))
 
 class Get_Scale(QMainWindow):
-    def __init__(self,app_desktop,wid):
-        if app and wid:
+    def __init__(self,app_desktop,wid): 
+        if app_desktop and wid:
             tmp=app_desktop().screenGeometry(wid)
             self.__size=(tmp.width(),tmp.height())
+        elif app_desktop:
+            super().__init__()
+            self.setWindowFlags(Qt.FramelessWindowHint)
+            self.setStyleSheet('background:transparent')
+            
+            self.setGeometry(0,0,1,1)
+            self.show()
+            tmp=app_desktop().screenGeometry(self)
+            self.__size=(tmp.width(),tmp.height())
+            
+            self.destroy()
         else:
             super().__init__()
             self.setWindowFlags(Qt.FramelessWindowHint)
             self.setStyleSheet('background:transparent')
             
-            if app:
-                self.setGeometry(0,0,1,1)
-                self.show()
-                tmp=app_desktop().screenGeometry(self)
-                self.__size=(tmp.width(),tmp.height())
-            else:
-                self.showFullScreen()
-                self.__size=(self.size().width(),self.size().height())
+            self.showFullScreen()
+            self.__size=(self.size().width(),self.size().height())
             
             self.destroy()
     
@@ -51,7 +56,7 @@ def get_path(current_dir):
 def scale(app=None,wid=None,base=1.25):
     scale_win=Get_Scale(app,wid)
     size=scale_win.get_resol()
-    return size[0]/RESOL[0]/base if size[0]/RESOL[0]==size[1]/RESOL[1] else 1
+    return size[0]/RESOL[0]/base if -0.1<size[0]/RESOL[0]-size[1]/RESOL[1]<0.1 else 1
 
 #reconnect pyqt5/pyside2 signal
 #obj: must be a signal, not QObject
