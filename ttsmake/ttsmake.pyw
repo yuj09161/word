@@ -33,7 +33,8 @@ class Make(MakeUI,QMainWindow):
         self.__signal.p.connect(self.__print)
         self.__signal.n.connect(self.__refresh)
         
-        self.btnFile.clicked.connect(self.__add_file)
+        self.btnAddAll.clicked.connect(self.__add_all)
+        self.btnAdd.clicked.connect(self.__add_file)
         self.btnCheck.clicked.connect(self.__check)
         self.btnStart.clicked.connect(self.__process)
         self.btnManual.clicked.connect(self.__manual)
@@ -58,6 +59,10 @@ class Make(MakeUI,QMainWindow):
             self.comboName.addItem(name)
             if ADD_ALL:
                 self.fileList.addItem(name)
+    
+    #add all file to fileList
+    def __add_all(self):
+        self.fileList.addItems(self.__names)
     
     #add file to fileList
     def __add_file(self):

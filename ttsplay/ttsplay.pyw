@@ -95,7 +95,7 @@ class PlayUI(QMainWindow,PlayUI):
         self.__rev=False
         self.__refresh_mode=2
         self.__r=0
-        self.__is_play_sapi=True
+        self.__is_play_sapi=False
         
         set_path()
         
@@ -364,9 +364,9 @@ class PlayUI(QMainWindow,PlayUI):
 
 if __name__=='__main__':
     if '-c' in sys.argv:
-        os.system('start /min "DO NOT CLOSE This Command Prompt, Otherwise TTS Player will be KILLED" cmd /c py ttsplay.pyw')
+        os.system('start /min "DO NOT CLOSE This Command Prompt, Otherwise TTS Player will be KILLED" cmd /c py -3.8 ttsplay.pyw')
     elif '-C' in sys.argv:
-        os.system('start /min "DO NOT CLOSE This Command Prompt, Otherwise TTS Player will be KILLED" cmd /k py ttsplay.pyw')
+        os.system('start /min "DO NOT CLOSE This Command Prompt, Otherwise TTS Player will be KILLED" cmd /k py -3.8 ttsplay.pyw')
     else:
         import ctypes
         myappid = 'hys.ttsplay'

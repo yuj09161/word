@@ -45,11 +45,13 @@ def safe_set_path(name):
 
 def get_path(current_dir):
     safe_set_path(current_dir+'..\\resources')
-    WORD_DIR   = safe_set_path(current_dir+'..\\resources\\word')
-    LOG_DIR    = safe_set_path(current_dir+'..\\log')
-    RETEST_DIR = safe_set_path(current_dir+'..\\retest')
-    SOUND_DIR  = safe_set_path(current_dir+'..\\resources\\audio')
-    TTS_DIR    = safe_set_path(current_dir+'..\\resources\\ttsWords')
+    WORD_DIR    = safe_set_path(current_dir+'..\\resources\\word')
+    LOG_DIR     = safe_set_path(current_dir+'..\\log')
+    RETEST_DIR  = safe_set_path(current_dir+'..\\retest')
+    SOUND_DIR   = safe_set_path(current_dir+'..\\resources\\audio')
+    TTS_DIR     = safe_set_path(current_dir+'..\\resources\\ttsWords')
+    ONEFILE_DIR = safe_set_path(current_dir+'..\\resources\\onefile')
+    #return (WORD_DIR,LOG_DIR,RETEST_DIR,SOUND_DIR,TTS_DIR,ONEFILE_DIR)
     return (WORD_DIR,LOG_DIR,RETEST_DIR,SOUND_DIR,TTS_DIR)
 
 

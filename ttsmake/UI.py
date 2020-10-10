@@ -25,11 +25,15 @@ class MakeUI(object):
         
         self.comboFile = QComboBox(self.gbFile)
         self.comboFile.setObjectName(u"comboSel")
-        self.comboFile.setGeometry(QRect(20*SCALE, 27*SCALE, 341*SCALE, 22*SCALE))
+        self.comboFile.setGeometry(QRect(20*SCALE, 27*SCALE, 241*SCALE, 22*SCALE))
         
-        self.btnFile = QPushButton(self.gbFile)
-        self.btnFile.setObjectName(u"btnSel")
-        self.btnFile.setGeometry(QRect(380*SCALE, 25*SCALE, 93*SCALE, 28*SCALE))
+        self.btnAddAll = QPushButton(self.gbFile)
+        self.btnAddAll.setObjectName(u"btnSel")
+        self.btnAddAll.setGeometry(QRect(380*SCALE, 25*SCALE, 93*SCALE, 28*SCALE))
+        
+        self.btnAdd = QPushButton(self.gbFile)
+        self.btnAdd.setObjectName(u"btnSel")
+        self.btnAdd.setGeometry(QRect(280*SCALE, 25*SCALE, 93*SCALE, 28*SCALE))
         #end file select
         
         #buttons
@@ -183,7 +187,8 @@ class MakeUI(object):
         make.setWindowTitle(QCoreApplication.translate("make", u"TTS Maker", None))
         
         self.gbFile.setTitle(QCoreApplication.translate("make", u"File", None))
-        self.btnFile.setText(QCoreApplication.translate("make", u"Add", None))
+        self.btnAddAll.setText(QCoreApplication.translate("make", u"Add All", None))
+        self.btnAdd.setText(QCoreApplication.translate("make", u"Add", None))
         
         self.btnCheck.setText(QCoreApplication.translate("make", u"Check", None))
         self.btnStart.setText(QCoreApplication.translate("make", u"Make", None))
