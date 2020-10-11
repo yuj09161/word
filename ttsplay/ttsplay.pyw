@@ -15,7 +15,11 @@ sys.path.append(os.path.abspath(CURRENT_DIR+'..'))
 from UI import PlayUI
 from commons import tools
 
-WORD_DIR,_,RETEST_DIR,SOUND_DIR,_=tools.get_path(CURRENT_DIR)
+
+USE_SAPI=False
+
+WORD_DIR,_,RETEST_DIR,SOUND_DIR,_,ONEFILE_DIR=tools.get_path(CURRENT_DIR)
+
 
 try:
     mixer.pre_init(24000,-16,1)
@@ -95,7 +99,6 @@ class PlayUI(QMainWindow,PlayUI):
         self.__rev=False
         self.__refresh_mode=2
         self.__r=0
-        self.__is_play_sapi=False
         
         set_path()
         
@@ -207,7 +210,7 @@ class PlayUI(QMainWindow,PlayUI):
     def __start(self,*,n=0):
         self.__isStop=False; self.__isPause=False
         self.btnPause.setEnabled(True)
-        if self.__is_play_sapi:
+        if USE_SAPI:
             threading.Thread(target=self.__play_sapi,daemon=True).start()
         else:
             threading.Thread(target=self.__play,args=(self.__path,),kwargs={'col':n,'manual':False},daemon=True).start()
@@ -347,7 +350,7 @@ class PlayUI(QMainWindow,PlayUI):
                 res+=AudioSegment.silent(100)
             n+=1
         file_name=os.path.splitext(os.path.basename(self.__file_name))[0]
-        res.export(CURRENT_DIR+'..\\onefile\\%s.mp3' %file_name,format='mp3',bitrate='32k')
+        res.export(ONEFILE_DIR+f'{file_name}.mp3',format='mp3',bitrate='32k')
         if not self.__isStop:
             self.__trigger.s.emit((111,0))
     
@@ -364,9 +367,9 @@ class PlayUI(QMainWindow,PlayUI):
 
 if __name__=='__main__':
     if '-c' in sys.argv:
-        os.system('start /min "DO NOT CLOSE This Command Prompt, Otherwise TTS Player will be KILLED" cmd /c py -3.8 ttsplay.pyw')
+        os.system('start /min "DO NOT CLOSE This Command Prompt, Otherwise TTS Player will be KILLED" cmd /c py ttsplay.pyw')
     elif '-C' in sys.argv:
-        os.system('start /min "DO NOT CLOSE This Command Prompt, Otherwise TTS Player will be KILLED" cmd /k py -3.8 ttsplay.pyw')
+        os.system('start /min "DO NOT CLOSE This Command Prompt, Otherwise TTS Player will be KILLED" cmd /k py ttsplay.pyw')
     else:
         import ctypes
         myappid = 'hys.ttsplay'

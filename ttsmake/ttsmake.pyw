@@ -14,7 +14,7 @@ from commons import tools
 
 SPEED_K=1.3; ADD_ALL=False; TMPFILE=CURRENT_DIR+'tmp.mp3'
 
-WORD_DIR,_,_,SOUND_DIR,TTS_DIR=tools.get_path(CURRENT_DIR)
+WORD_DIR,_,_,SOUND_DIR,TTS_DIR,_=tools.get_path(CURRENT_DIR)
 
 class Sign(QObject):
     p=Signal(tuple)
@@ -121,16 +121,17 @@ class Make(MakeUI,QMainWindow):
         self.__stopped=False
         mod=self.rbEng.isChecked()
         if mod:
-            mode='e'
+            lang_suffix='e'
         else:
-            mode='k'
+            lang_suffix='k'
         if self.rbHere.isChecked():
-            path=CURRENT_DIR+'out_%s.mp3' %mode
+            path=CURRENT_DIR+f'out_{lang_suffix}.mp3'
         else:
-            path=(SOUND_DIR+
-                os.path.splitext(self.comboName.currentText()+'\\')[0]+
-                str(self.spNum.value())+
-                '_%s.mp3' %mode)
+            path=(
+                SOUND_DIR+                                              #sound dir (base)
+                os.path.splitext(self.comboName.currentText()+'\\')[0]+ #word list dir
+                str(self.spNum.value())+f'_{lang_suffix}.mp3'           #file name
+            )
         self.pgC.setRange(0,0)
         threading.Thread(target=self.__worker_manual,kwargs={'mode':mod,'text':self.lnToTts.text(),'out_path':path}).start()
     
@@ -183,20 +184,10 @@ class Make(MakeUI,QMainWindow):
                         out_l=tools.safe_set_path(SOUND_DIR+name)+str(k)
                         if word[0]:
                             self.__eng(word[0],out_l+'_e.mp3')
-                            '''
-                            with open(out_l+'_e.mp3','wb') as out_file:
-                                self.__eng(word[0]).write_to_fp(out_file)
-                            '''
                         if word[1]:
                             self.__kor(word[1],TMPFILE)
-                            '''
-                            with open(TMPFILE,'wb') as out_file:
-                                self.__kor(word[1]).write_to_fp(out_file)
-                            '''
-                            #app.processEvents()
                             effects.speedup(AudioSegment.from_mp3(TMPFILE),SPEED_K).export(out_l+'_k.mp3',format="mp3", bitrate='32k')
                         self.__signal.p.emit((name,': ',k,'/',length))
-                        #app.processEvents()
                         k+=1
                     else:
                         self.__signal.p.emit(('#####Force Stop#####',))
@@ -219,7 +210,7 @@ class Make(MakeUI,QMainWindow):
             return
     
     def __worker_manual(self,*,mode,text,out_path):
-        self.__signal.p.emit(('Manual Making Start\nOutput File is %s' %out_path,))
+        self.__signal.p.emit((f'Manual Making Start\nOutput File is {out_path}',))
         try:
             if mode:
                 self.__signal.p.emit(('English...',))
@@ -239,7 +230,7 @@ class Make(MakeUI,QMainWindow):
                 if os.path.isfile(TMPFILE):
                     os.remove(TMPFILE)
         except Exception as e:
-            self.__signal.p.emit(('An Error Occured\nTraceback:\n%s' %e,))
+            self.__signal.p.emit((f'An Error Occured\nTraceback:\n{e}',))
         else:
             self.__signal.p.emit(('Well Done',))
         finally:

@@ -37,7 +37,7 @@ ckeck_symbol = ('(','[','~','...','.')
 setting_closed=True
 
 #get dir
-WORD_DIR,LOG_DIR,RETEST_DIR,_,_=tools.get_path(CURRENT_DIR)
+WORD_DIR,LOG_DIR,RETEST_DIR,_,_,_=tools.get_path(CURRENT_DIR)
 
 class selectWin(QMainWindow,SelectUI):
     def __init__(self):
@@ -714,9 +714,9 @@ def log(wrong,type): #log file generator
     
     #set prifix & file name parsing
     if ']_' in name:
-        prefix='[%s]_' %name.split(']_')[-1]+time
+        prefix=f'[{name.split("]_")[-1]+time}]_'
     else:
-        prefix='[%s]_' %name+time
+        prefix=f'[{name+time}]_'
     
     if error: #if wrong answer(s) exist
         #file generate prepare
@@ -725,21 +725,21 @@ def log(wrong,type): #log file generator
         #log file generation
         with open(LOG_DIR+prefix+'.txt','w',encoding='utf-8') as file:
             #log exam type
-            file.write('--------Exam Type: %s--------\n' %type)
+            file.write(f'--------Exam Type: {type}--------\n')
             #log exam file(s)
             file.write('-----------Exam File(s)-----------\n')
             for name in fileName:
                 file.write(name+'\n')
             #log all type wrong(s)
-            file.write('\n----------All type Wrongs----------\nTotal Wrong: %s/%s\n' %(n[2],n[3]))
+            file.write(f'\n----------All type Wrongs----------\nTotal Wrong: {n[2]}/{n[3]}\n')
             for w in error:
                 file.write(' / '.join(w)+'\n')
             #log wrong(s) english to korean
-            file.write('\n----------English to Korean----------\nwrong: %s/%s\n' %(n[0],n[3]))
+            file.write(f'\n----------English to Korean----------\nwrong: {n[0]}/{n[3]}\n')
             for w in etk:
                 file.write(' / '.join(w)+'\n')
             #log wrong(s) korean to english
-            file.write('\n----------Korean to English----------\nwrong: %s/%s\n' %(n[1],n[3]))
+            file.write(f'\n----------Korean to English----------\nwrong: {n[1]}/{n[3]}\n')
             for w in kte:
                 w=list(w)
                 w[0],w[1]=w[1],w[0]
@@ -752,7 +752,7 @@ def log(wrong,type): #log file generator
     else:
         with open(LOG_DIR+prefix+'.txt','w',encoding='utf-8') as file:
             #log exam type
-            file.write('--------Exam Type: %s--------\n' %type)
+            file.write(f'--------Exam Type: {type}--------\n')
             #log exam file(s)
             file.write('----------Exam File(s)----------\n')
             for name in fileName:
