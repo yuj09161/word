@@ -10,6 +10,15 @@ class MakeUI(object):
         #set size
         make.setFixedSize(640*SCALE, 480*SCALE)
         
+        self.centralwidget=QWidget(self)
+        make.setCentralWidget(self.centralwidget)
+        self.glMain=QGridLayout(self.centralwidget)
+        self.glMain.setContentsMargins(20,20,20,20)
+        
+        sizePolicy_EF = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        sizePolicy_EF.setHorizontalStretch(0)
+        sizePolicy_EF.setVerticalStretch(0)
+        
         sizePolicy_FP = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
         sizePolicy_FP.setHorizontalStretch(0)
         sizePolicy_FP.setVerticalStretch(0)
@@ -19,57 +28,78 @@ class MakeUI(object):
         sizePolicy_FF.setVerticalStretch(0)
         
         #file select group box
-        self.gbFile = QGroupBox(make)
+        self.gbFile = QGroupBox(self.centralwidget)
         self.gbFile.setObjectName(u"fileSel")
-        self.gbFile.setGeometry(QRect(15*SCALE, 20*SCALE, 491*SCALE, 71*SCALE))
+        self.glFile=QGridLayout(self.gbFile)
+        self.glFile.setContentsMargins(10,2,10,2)
         
         self.comboFile = QComboBox(self.gbFile)
         self.comboFile.setObjectName(u"comboSel")
-        self.comboFile.setGeometry(QRect(20*SCALE, 27*SCALE, 241*SCALE, 22*SCALE))
+        sizePolicy_EF.setHeightForWidth(self.comboFile.sizePolicy().hasHeightForWidth())
+        self.comboFile.setSizePolicy(sizePolicy_EF)
+        self.glFile.addWidget(self.comboFile,0,0,1,1)
         
         self.btnAddAll = QPushButton(self.gbFile)
         self.btnAddAll.setObjectName(u"btnSel")
-        self.btnAddAll.setGeometry(QRect(380*SCALE, 25*SCALE, 93*SCALE, 28*SCALE))
+        self.glFile.addWidget(self.btnAddAll,0,1,1,1)
         
         self.btnAdd = QPushButton(self.gbFile)
         self.btnAdd.setObjectName(u"btnSel")
-        self.btnAdd.setGeometry(QRect(280*SCALE, 25*SCALE, 93*SCALE, 28*SCALE))
+        self.glFile.addWidget(self.btnAdd,0,2,1,1)
+        
+        self.glMain.addWidget(self.gbFile,0,0,2,2)
         #end file select
         
         #buttons
-        self.btnCheck = QPushButton(make)
+        self.btnCheck = QPushButton(self.centralwidget)
         self.btnCheck.setObjectName(u"btnCheck")
-        self.btnCheck.setGeometry(QRect(530*SCALE, 30*SCALE, 81*SCALE, 28*SCALE))
+        sizePolicy_FF.setHeightForWidth(self.btnCheck.sizePolicy().hasHeightForWidth())
+        self.btnCheck.setSizePolicy(sizePolicy_FF)
+        self.glMain.addWidget(self.btnCheck,0,2,1,1)
         
-        self.btnStart = QPushButton(make)
+        self.btnStart = QPushButton(self.centralwidget)
         self.btnStart.setObjectName(u"btnStart")
-        self.btnStart.setGeometry(QRect(530*SCALE, 60*SCALE, 81*SCALE, 28*SCALE))
+        sizePolicy_FF.setHeightForWidth(self.btnStart.sizePolicy().hasHeightForWidth())
+        self.btnStart.setSizePolicy(sizePolicy_FF)
+        self.glMain.addWidget(self.btnStart,1,2,1,1)
         #end buttons
         
         #main tabbed widget
-        self.twMain = QTabWidget(make)
+        self.twMain = QTabWidget(self.centralwidget)
         self.twMain.setObjectName(u"twMain")
-        self.twMain.setGeometry(QRect(15*SCALE, 101*SCALE, 610*SCALE, 291*SCALE))
+        self.glMain.addWidget(self.twMain,2,0,1,3)
         
-        #file tab
+        ##file tab
         self.tFile = QWidget()
         self.tFile.setObjectName(u"tFile")
-        self.twMain.addTab(self.tFile, "File")
+        self.glFile=QGridLayout(self.tFile)
+        self.glFile.setContentsMargins(2,2,2,2)
         
         self.fileList = QListWidget(self.tFile)
         self.fileList.setObjectName(u"fileList")
-        self.fileList.setGeometry(QRect(0*SCALE, 0*SCALE, 604*SCALE, 263*SCALE))
         self.fileList.setDragDropMode(QAbstractItemView.InternalMove)
         self.fileList.setDefaultDropAction(Qt.MoveAction)
+        self.glFile.addWidget(self.fileList,0,0,1,2)
         
-        #manual tab
-        self.tabManual = QWidget()
-        self.tabManual.setObjectName(u"tabManual")
-        self.twMain.addTab(self.tabManual, "")
+        sp=QSpacerItem(80,20,QSizePolicy.Expanding,QSizePolicy.Minimum)
+        self.glFile.addItem(sp,1,0,1,1)
         
-        self.gbLang = QGroupBox(self.tabManual)
+        self.btnDelAll=QPushButton(self)
+        self.glFile.addWidget(self.btnDelAll,1,1,1,1)
+        
+        self.twMain.addTab(self.tFile, "File")
+        
+        '''
+        ##manual tab
+        
+        self.tManual = QWidget()
+        self.tManual.setObjectName(u"tManual")
+        
+        self.gbLang = QGroupBox(self.tManual)
         self.gbLang.setObjectName(u"gbLang")
-        self.gbLang.setGeometry(QRect(20*SCALE, 30*SCALE, 201*SCALE, 58*SCALE))
+        self.glFile=QGridLayout(self.gbFile)
+        self.glFile.setContentsMargins(2,2,2,2)
+        self.gbLang
         
         #Language grid
         self.glLang = QGridLayout(self.gbLang)
@@ -86,9 +116,8 @@ class MakeUI(object):
         #end Language
         
         #Save Destination
-        self.gbTo = QGroupBox(self.tabManual)
+        self.gbTo = QGroupBox(self.tManual)
         self.gbTo.setObjectName(u"gbTo")
-        self.gbTo.setGeometry(QRect(260*SCALE, 30*SCALE, 331*SCALE, 86*SCALE))
         self.glTo = QGridLayout(self.gbTo)
         self.glTo.setObjectName(u"glTo")
 
@@ -124,58 +153,67 @@ class MakeUI(object):
         sizePolicy_FF.setHeightForWidth(self.spNum.sizePolicy().hasHeightForWidth())
         self.spNum.setSizePolicy(sizePolicy_FF)
         self.glTo.addWidget(self.spNum, 1, 3, 1, 1)
+        
+        self.gbTo
         #end Save
         
         #input & make
-        self.lbText = QLabel(self.tabManual)
+        self.lbText = QLabel(self.tManual)
         self.lbText.setObjectName(u"lbText")
-        self.lbText.setGeometry(QRect(20*SCALE, 176*SCALE, 39*SCALE, 15*SCALE))
+        self.lbText
         
-        self.lnToTts = QLineEdit(self.tabManual)
+        self.lnToTts = QLineEdit(self.tManual)
         self.lnToTts.setObjectName(u"lbToTts")
-        self.lnToTts.setGeometry(QRect(70*SCALE, 172*SCALE, 411*SCALE, 24*SCALE))
+        self.lnToTts
         
-        self.btnManual = QPushButton(self.tabManual)
+        self.btnManual = QPushButton(self.tManual)
         self.btnManual.setObjectName(u"btnMake")
-        self.btnManual.setGeometry(QRect(500*SCALE, 170*SCALE, 93*SCALE, 28*SCALE))
+        self.btnManual
         #end
         
+        self.twMain.addTab(self.tManual, "")
         #end Manual Make
+        '''
         
-        #logger tab
-        self.tLog = QWidget()
-        self.tLog.setObjectName(u"tLog")
-        self.twMain.addTab(self.tLog, "Log")
-        
-        self.pteLog = QPlainTextEdit(self.tLog)
+        ##master log tab
+        self.pteLog = QPlainTextEdit(self.twMain)
         self.pteLog.setObjectName(u"pteLog")
-        self.pteLog.setGeometry(QRect(0*SCALE, 0*SCALE, 604*SCALE, 263*SCALE))
         self.pteLog.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
         self.pteLog.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.pteLog.setReadOnly(True)
-        #end tab
+        self.twMain.addTab(self.pteLog, f"Log")
         
         #progress bar
-        self.pgE = QProgressBar(make)
-        self.pgE.setObjectName(u"pgE")
-        self.pgE.setGeometry(QRect(70*SCALE, 400*SCALE, 541*SCALE, 23*SCALE))
-        
-        self.pgC = QProgressBar(make)
-        self.pgC.setObjectName(u"pbC")
-        self.pgC.setGeometry(QRect(70*SCALE, 440*SCALE, 541*SCALE, 23*SCALE))
-        
         font_pg = QFont()
         font_pg.setPointSize(11)
         
-        self.lbE = QLabel(make)
+        '''
+        self.lbE = QLabel(self.centralwidget)
         self.lbE.setObjectName(u"lbE")
-        self.lbE.setGeometry(QRect(20*SCALE, 403*SCALE, 42*SCALE, 18*SCALE))
+        sizePolicy_FF.setHeightForWidth(self.lbE.sizePolicy().hasHeightForWidth())
+        self.lbE.setSizePolicy(sizePolicy_FF)
+        self.glMain.addWidget(self.lbE,3,0,1,1)
         self.lbE.setFont(font_pg)
         
-        self.lbC = QLabel(make)
+        self.pgE = QProgressBar(self.centralwidget)
+        self.pgE.setObjectName(u"pgE")
+        sizePolicy_EF.setHeightForWidth(self.pgE.sizePolicy().hasHeightForWidth())
+        self.pgE.setSizePolicy(sizePolicy_EF)
+        self.glMain.addWidget(self.pgE,3,1,1,2)
+        '''
+        
+        self.lbC = QLabel(self.centralwidget)
         self.lbC.setObjectName(u"lbC")
-        self.lbC.setGeometry(QRect(20*SCALE, 443*SCALE, 42*SCALE, 18*SCALE))
+        sizePolicy_FF.setHeightForWidth(self.lbC.sizePolicy().hasHeightForWidth())
+        self.lbC.setSizePolicy(sizePolicy_FF)
+        self.glMain.addWidget(self.lbC,4,0,1,1)
         self.lbC.setFont(font_pg)
+        
+        self.pgC = QProgressBar(self.centralwidget)
+        self.pgC.setObjectName(u"pbC")
+        sizePolicy_EF.setHeightForWidth(self.pgC.sizePolicy().hasHeightForWidth())
+        self.pgC.setSizePolicy(sizePolicy_EF)
+        self.glMain.addWidget(self.pgC,4,1,1,2)
         #end progress bar
 
         self.retranslateUi(make)
@@ -189,15 +227,18 @@ class MakeUI(object):
         self.gbFile.setTitle(QCoreApplication.translate("make", u"File", None))
         self.btnAddAll.setText(QCoreApplication.translate("make", u"Add All", None))
         self.btnAdd.setText(QCoreApplication.translate("make", u"Add", None))
-        
         self.btnCheck.setText(QCoreApplication.translate("make", u"Check", None))
         self.btnStart.setText(QCoreApplication.translate("make", u"Make", None))
         
-        self.pgE.setFormat(QCoreApplication.translate("make", u"%v/%m", None))
-        self.pgC.setFormat(QCoreApplication.translate("make", u"%v/%m", None))
-        self.lbE.setText(QCoreApplication.translate("make", u"\uc804\uccb4:", None))
-        self.lbC.setText(QCoreApplication.translate("make", u"\ud604\uc7ac:", None))
+        self.btnDelAll.setText(QCoreApplication.translate("make", u"Delete All", None))
         
+        #self.lbE.setText(QCoreApplication.translate("make", u"\uc804\uccb4:", None))
+        #self.pgE.setFormat(QCoreApplication.translate("make", u"%v/%m", None))
+        #self.lbC.setText(QCoreApplication.translate("make", u"\ud604\uc7ac:", None))
+        self.lbC.setText(QCoreApplication.translate("make", u"\uc9c4\ud589\ub960:", None))
+        self.pgC.setFormat(QCoreApplication.translate("make", u"%v/%m", None))
+        
+        '''
         self.gbLang.setTitle(QCoreApplication.translate("make", u"Language", None))
         self.rbEng.setText(QCoreApplication.translate("make", u"English", None))
         self.rbKor.setText(QCoreApplication.translate("make", u"Korean", None))
@@ -208,6 +249,16 @@ class MakeUI(object):
         self.lbNum.setText(QCoreApplication.translate("make", u"No.", None))
         self.rbTts.setText(QCoreApplication.translate("make", u"TTS Dir", None))
         self.rbHere.setText(QCoreApplication.translate("make", u"Current Dir", None))
-        self.twMain.setTabText(1, QCoreApplication.translate("make", u"Manual", None))
+        self.twMain.setTabText(1, QCoreApplication.translate("make", u"Manual", None))'''
     # retranslateUi
-
+    
+    def makeTab(self,n):
+        pteLog = QPlainTextEdit(self.twMain)
+        pteLog.setObjectName(u"pteLog")
+        pteLog.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        pteLog.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        pteLog.setReadOnly(True)
+        
+        self.twMain.addTab(pteLog, f"T{n}")
+        
+        return pteLog

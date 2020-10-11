@@ -51,7 +51,6 @@ def get_path(current_dir):
     SOUND_DIR   = safe_set_path(current_dir+'..\\resources\\audio')
     TTS_DIR     = safe_set_path(current_dir+'..\\resources\\ttsWords')
     ONEFILE_DIR = safe_set_path(current_dir+'..\\onefile')
-    #return (WORD_DIR,LOG_DIR,RETEST_DIR,SOUND_DIR,TTS_DIR,ONEFILE_DIR)
     return (WORD_DIR,LOG_DIR,RETEST_DIR,SOUND_DIR,TTS_DIR,ONEFILE_DIR)
 
 
