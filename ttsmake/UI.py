@@ -187,27 +187,12 @@ class MakeUI(object):
         font_pg = QFont()
         font_pg.setPointSize(11)
         
-        '''
-        self.lbE = QLabel(self.centralwidget)
-        self.lbE.setObjectName(u"lbE")
-        sizePolicy_FF.setHeightForWidth(self.lbE.sizePolicy().hasHeightForWidth())
-        self.lbE.setSizePolicy(sizePolicy_FF)
-        self.glMain.addWidget(self.lbE,3,0,1,1)
-        self.lbE.setFont(font_pg)
-        
-        self.pgE = QProgressBar(self.centralwidget)
-        self.pgE.setObjectName(u"pgE")
-        sizePolicy_EF.setHeightForWidth(self.pgE.sizePolicy().hasHeightForWidth())
-        self.pgE.setSizePolicy(sizePolicy_EF)
-        self.glMain.addWidget(self.pgE,3,1,1,2)
-        '''
-        
         self.lbC = QLabel(self.centralwidget)
         self.lbC.setObjectName(u"lbC")
         sizePolicy_FF.setHeightForWidth(self.lbC.sizePolicy().hasHeightForWidth())
         self.lbC.setSizePolicy(sizePolicy_FF)
-        self.glMain.addWidget(self.lbC,4,0,1,1)
         self.lbC.setFont(font_pg)
+        self.glMain.addWidget(self.lbC,4,0,1,1)
         
         self.pgC = QProgressBar(self.centralwidget)
         self.pgC.setObjectName(u"pbC")
@@ -232,9 +217,6 @@ class MakeUI(object):
         
         self.btnDelAll.setText(QCoreApplication.translate("make", u"Delete All", None))
         
-        #self.lbE.setText(QCoreApplication.translate("make", u"\uc804\uccb4:", None))
-        #self.pgE.setFormat(QCoreApplication.translate("make", u"%v/%m", None))
-        #self.lbC.setText(QCoreApplication.translate("make", u"\ud604\uc7ac:", None))
         self.lbC.setText(QCoreApplication.translate("make", u"\uc9c4\ud589\ub960:", None))
         self.pgC.setFormat(QCoreApplication.translate("make", u"%v/%m", None))
         
@@ -249,7 +231,8 @@ class MakeUI(object):
         self.lbNum.setText(QCoreApplication.translate("make", u"No.", None))
         self.rbTts.setText(QCoreApplication.translate("make", u"TTS Dir", None))
         self.rbHere.setText(QCoreApplication.translate("make", u"Current Dir", None))
-        self.twMain.setTabText(1, QCoreApplication.translate("make", u"Manual", None))'''
+        self.twMain.setTabText(1, QCoreApplication.translate("make", u"Manual", None))
+        '''
     # retranslateUi
     
     def makeTab(self,n):

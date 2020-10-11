@@ -15,10 +15,16 @@ from commons import tools
 
 SPEED_K=1.3
 THREAD_MULTI=2
+THREAD_LIMIT=16
 TMPFILE=CURRENT_DIR+'tmp.mp3'
 
 WORD_DIR,_,_,SOUND_DIR,TTS_DIR,_=tools.get_path(CURRENT_DIR)
-THREAD_COUNT=os.cpu_count()*THREAD_MULTI
+
+if THREAD_LIMIT:
+    THREAD_COUNT=min(os.cpu_count()*THREAD_MULTI,THREAD_LIMIT)
+else:
+    THREAD_COUNT=os.cpu_count()*THREAD_MULTI
+
 
 class Sign(QObject):
     p=Signal(tuple)
@@ -91,21 +97,23 @@ class Make(MakeUI,QMainWindow):
             self.__stopped=True
             self.btnStart.setText('Make')
             tools.reconnect(self.btnStart.clicked,self.__process)
+            self.pgC.setRange(0,1)
             self.pgC.reset()
         thread,e=num
         if e==0:
             self.pgC.setValue(self.pgC.value()+1)
         elif e==101:
+            self.__print((0,f'Thread {thread} Finished'))
             self.__ended_thread+=1
             if self.__ended_thread==THREAD_COUNT:
-                QMessageBox.information(self, 'Finished', 'Make File Finished')
                 self.__print((0,'All Thread Finished'))
+                QMessageBox.information(self, 'Finished', 'Make File Finished')
                 end()
         elif e==102:
             self.__ended_thread+=1
             if self.__ended_thread==THREAD_COUNT:
-                QMessageBox.warning(self, 'Aborted', 'Make File Aborted')
                 self.__print((0,'Aborted'))
+                QMessageBox.warning(self, 'Aborted', 'Make File Aborted')
                 end()
         elif e==103:
             QMessageBox.warning(self,'Error','No File Selected',buttons=QMessageBox.Ok)
@@ -164,7 +172,7 @@ class Make(MakeUI,QMainWindow):
         k+=1
         threading.Thread(target=self.__worker,args=(k+1,word_path[wot*k:])).start()
         
-        self.__print((0,f'Make Started\nWord in One Thread: {wot}'))
+        self.__print((0,f'Make Started\nWords: {word_count}',f'Word in One Thread: {wot}'))
     
     def __stop(self):
         self.__stopped=True
