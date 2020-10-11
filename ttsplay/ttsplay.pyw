@@ -301,6 +301,7 @@ class PlayUI(QMainWindow,PlayUI):
                             self.__n+=1
                 self.__n=0; self.__r+=1
             self.__trigger.s.emit((101,0))
+        mixer.music.unload()
     
     def __play_sapi(self):
         r=0

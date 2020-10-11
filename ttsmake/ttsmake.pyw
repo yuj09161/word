@@ -84,7 +84,6 @@ class Make(MakeUI,QMainWindow):
     
     #write to log widget
     def __print(self,response):
-        print(response)
         self.__pte_log[response[0]].appendPlainText(' / '.join([str(t) for t in response[1:]])+'\n')
     
     def __refresh(self,num):
@@ -99,12 +98,14 @@ class Make(MakeUI,QMainWindow):
         elif e==101:
             self.__ended_thread+=1
             if self.__ended_thread==THREAD_COUNT:
-                QMessageBox.information(self, 'Ended', 'Make File Ended')
+                QMessageBox.information(self, 'Finished', 'Make File Finished')
+                self.__print((0,'All Thread Finished'))
                 end()
         elif e==102:
             self.__ended_thread+=1
             if self.__ended_thread==THREAD_COUNT:
                 QMessageBox.warning(self, 'Aborted', 'Make File Aborted')
+                self.__print((0,'Aborted'))
                 end()
         elif e==103:
             QMessageBox.warning(self,'Error','No File Selected',buttons=QMessageBox.Ok)
@@ -162,6 +163,8 @@ class Make(MakeUI,QMainWindow):
             threading.Thread(target=self.__worker,args=(k+1,word_path[wot*k:wot*(k+1)])).start()
         k+=1
         threading.Thread(target=self.__worker,args=(k+1,word_path[wot*k:])).start()
+        
+        self.__print((0,f'Make Started\nWord in One Thread: {wot}'))
     
     def __stop(self):
         self.__stopped=True
@@ -182,7 +185,7 @@ class Make(MakeUI,QMainWindow):
     
     def __worker(self,thread_number,word_path):
         word_length=len(word_path)
-        self.__signal.p.emit((thread_number,f'This thread will process {word_length} words'))
+        self.__signal.p.emit((thread_number,f'This thread({thread_number}) will process {word_length} words'))
         
         temp_path=gettempdir()+'/'+next(_get_candidate_names())
         
