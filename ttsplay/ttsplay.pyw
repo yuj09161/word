@@ -1,13 +1,13 @@
 from PySide2.QtCore import (QCoreApplication, QMetaObject, QObject, QPoint,
-    QRect, QSize, QUrl, Qt, Signal, Slot, QLocale)
+    QRect, QSize, QUrl, Qt, Signal, Slot, QLocale, QTimer)
 from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont,
     QFontDatabase, QIcon, QLinearGradient, QPalette, QPainter, QPixmap,
     QRadialGradient, QGuiApplication)
 from PySide2.QtWidgets import *
 
-from pygame import mixer
+from pygame import mixer,version
 from pydub import AudioSegment
-import os,sys,time,threading
+import os,sys,time,threading,argparse
 
 CURRENT_DIR=os.path.dirname(os.path.abspath(__file__))+'\\'
 sys.path.append(os.path.abspath(CURRENT_DIR+'..'))
@@ -16,9 +16,11 @@ from UI import PlayUI
 from commons import tools
 
 
-USE_SAPI=False
+USE_SAPI     = False
+JMP_INTERVAL = 500    #in millisecond
 
 WORD_DIR,_,RETEST_DIR,SOUND_DIR,_,ONEFILE_DIR=tools.get_path(CURRENT_DIR)
+PYGAME_VERSION=version.vernum
 
 
 try:
@@ -69,6 +71,7 @@ class PlayUI(QMainWindow,PlayUI):
                 if self.spinNum.value()<=self.__r: #r=repeat count-1
                     self.__refresh_mode=2
                     self.btnSet.setEnabled(True)
+                    self.__start(n=k)
                     self.btnSet.setStyleSheet('color: red')
                 else:
                     self.__refresh_mode=1
@@ -83,12 +86,7 @@ class PlayUI(QMainWindow,PlayUI):
             if self.__isStop:
                 self.__manual_play(a)
             else:
-                self.__stop(is_jump=a)
-        
-        def cell_click_trigger_2(k):
-            assert type(k) is int
-            if k:
-                self.__start(n=k)
+                self.__jump(a)
         
         super().__init__()
         self.setupUi(self,SCALE)
@@ -104,7 +102,6 @@ class PlayUI(QMainWindow,PlayUI):
         
         self.__trigger=Signal()
         self.__trigger.s.connect(self.__refresh)
-        self.__trigger.p.connect(cell_click_trigger_2)
         
         self.btnSet.clicked.connect(self.__setFile)
         self.btnRefresh.clicked.connect(set_path)
@@ -154,7 +151,7 @@ class PlayUI(QMainWindow,PlayUI):
             last_lecture=0; self.__path=[]; names=[]
             for word in self.__words:
                 if word in self.__origin[last_lecture]:
-                    names.append(self.__origin_file[last_lecture].rsplit('.',1)[0] #name of original file
+                    names.append(os.path.splitext(self.__origin_file[last_lecture])[0] #name of original file
                                  +'\\'
                                  +str(self.__origin[last_lecture].index(word)+1) #number of the word
                                  )
@@ -162,7 +159,7 @@ class PlayUI(QMainWindow,PlayUI):
                     for k in range(self.__origin_len):
                         if word in self.__origin[k]:
                             last_lecture=k
-                            names.append(self.__origin_file[k].rsplit('.',1)[0] #name of original file
+                            names.append(os.path.splitext(self.__origin_file[k])[0] #name of original file
                                          +'\\'
                                          +str(self.__origin[k].index(word)+1) #number of the word
                                          )
@@ -213,12 +210,18 @@ class PlayUI(QMainWindow,PlayUI):
         if USE_SAPI:
             threading.Thread(target=self.__play_sapi,daemon=True).start()
         else:
-            threading.Thread(target=self.__play,args=(self.__path,),kwargs={'col':n,'manual':False},daemon=True).start()
+            threading.Thread(target=self.__play,args=(self.__path,),kwargs={'col':n*2,'manual':False},daemon=True).start()
         tools.reconnect(self.btnStartStop.clicked,self.__stop)
         self.btnStartStop.setText(u'\u25a0')
     
+    def __jump(self,n):
+        self.__stop(False)
+        QTimer.singleShot(JMP_INTERVAL,lambda: self.__start(n=n))
+    
     def __onefile(self):
         self.__isStop=False
+        self.pgBar.setRange(0,len(self.__path))
+        self.pgBar.setValue(0)
         threading.Thread(target=self.__worker,args=(self.__path,),daemon=True).start()
         tools.reconnect(self.btnStartStop.clicked,self.__stop)
         self.btnStartStop.setText(u'\u25a0')
@@ -234,42 +237,22 @@ class PlayUI(QMainWindow,PlayUI):
                 self.__n=(self.__n//2)*2
                 self.btnPause.setStyleSheet('color: red')
     
-    def __stop(self,move=True,is_jump=False):
+    def __stop(self,move=True):
         self.__isStop=True; self.__isPause=False
         self.__r=0
         mixer.music.stop()
-        if is_jump:
-            self.__trigger.p.emit(is_jump)
-        else:
-            self.pgBar.reset()
-            self.btnPause.setEnabled(False)
-            self.btnPause.setStyleSheet('')
-            if move:
-                self.twWord.setCurrentCell(0,0)
-                self.twWord.setCurrentCell(0,3)
-            tools.reconnect(self.btnStartStop.clicked,self.__start)
-            self.btnStartStop.setText(u'\u25b6')
+        self.pgBar.reset()
+        self.btnPause.setEnabled(False)
+        self.btnPause.setStyleSheet('')
+        if move:
+            self.twWord.setCurrentCell(0,0)
+            self.twWord.setCurrentCell(0,3)
+        tools.reconnect(self.btnStartStop.clicked,self.__start)
+        self.btnStartStop.setText(u'\u25b6')
     
     #play sound process
-    def __play(self,*args,**kwargs):
-        kwarg_list=kwargs.keys() #list of command
-        #if not word
-        if not len(args)>0:
-            raise ValueError
-        #set manual flag
-        if 'manual' in kwarg_list:
-            assert type(kwargs['manual']) is bool
-            manual=kwargs['manual']
-        else:
-            manual=False
-        #set initial column
-        if 'col' in kwarg_list:
-            assert type(kwargs['col']) is int
-            num=kwargs['col']*2
-        else:
-            num=0
-        names=args[0]
-        self.__n=num; length=len(names)
+    def __play(self,names,*,manual=False,col=0):
+        self.__n=col; length=len(names)
         
         if manual:
             for k in range(2):
@@ -301,7 +284,8 @@ class PlayUI(QMainWindow,PlayUI):
                             self.__n+=1
                 self.__n=0; self.__r+=1
             self.__trigger.s.emit((101,0))
-        mixer.music.unload()
+        if PYGAME_VERSION[0]>1:
+            mixer.music.unload()
     
     def __play_sapi(self):
         r=0
@@ -340,20 +324,17 @@ class PlayUI(QMainWindow,PlayUI):
     def __worker(self,*args,**kargs):
         names=args[0]
         res=AudioSegment.from_mp3(names[0])
-        n=1
-        for name in names[1:]:
-            self.__trigger.s.emit((0,n))
+        for k,name in enumerate(names[1:]):
+            self.__trigger.s.emit((0,k))
             if self.__isStop:
                 self.__trigger.s.emit((112,0))
                 break
             res+=AudioSegment.from_mp3(name)
-            if n%2==1:
+            if k%2==0:
                 res+=AudioSegment.silent(100)
-            n+=1
         file_name=os.path.splitext(os.path.basename(self.__file_name))[0]
         res.export(ONEFILE_DIR+f'{file_name}.mp3',format='mp3',bitrate='32k')
-        if not self.__isStop:
-            self.__trigger.s.emit((111,0))
+        self.__trigger.s.emit((111,0))
     
     def __tools(self):
         if self.__expanded:
@@ -364,12 +345,28 @@ class PlayUI(QMainWindow,PlayUI):
             self.setFixedSize(870*SCALE, 570*SCALE)
             self.btnMore.setText('<<')
             self.__expanded=True
+    
+    def closeEvent(self,event):
+        if self.__isStop:
+            event.accept()
+        else:
+            self.__isStop=True
+            mixer.music.stop()
+            if PYGAME_VERSION[0]>1:
+                mixer.music.unload()
+            event.accept()
 
 
 if __name__=='__main__':
-    if '-c' in sys.argv:
+    parser=argparse.ArgumentParser()
+    parser.add_argument('-c',action='store_true')
+    parser.add_argument('-k',action='store_true')
+    
+    parsed_result=parser.parse_args()
+    
+    if parsed_result.c:
         os.system('start /min "DO NOT CLOSE This Command Prompt, Otherwise TTS Player will be KILLED" cmd /c py ttsplay.pyw')
-    elif '-C' in sys.argv:
+    elif parsed_result.k:
         os.system('start /min "DO NOT CLOSE This Command Prompt, Otherwise TTS Player will be KILLED" cmd /k py ttsplay.pyw')
     else:
         import ctypes

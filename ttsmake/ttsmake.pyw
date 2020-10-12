@@ -3,7 +3,7 @@ from PySide2.QtGui import *
 from PySide2.QtWidgets import *
 
 from gtts import gTTS as tts
-import os,sys,threading,traceback
+import os,sys,threading,traceback,argparse
 from pydub import effects,AudioSegment
 from tempfile import gettempdir,_get_candidate_names
 
@@ -272,7 +272,13 @@ class Make(MakeUI,QMainWindow):
 
 
 if __name__=='__main__':
-    if '-q' in sys.argv:
+    parser=argparse.ArgumentParser()
+    parser.add_argument('-q',action='store_true')
+    parser.add_argument('-k',action='store_true')
+    
+    parsed_result=parser.parse_args()
+    
+    if parsed_result.q:
         import ctypes
         myappid='hys.ttsmake'
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
@@ -286,7 +292,7 @@ if __name__=='__main__':
         make.show()
         
         sys.exit(app.exec_())
-    elif '-C' in sys.argv:
+    elif parsed_result.k:
         os.system('start /min "DO NOT CLOSE This Command Prompt, Otherwise TTS Maker will be KILLED" cmd /k py ttsmake.pyw -q')
     else:
         os.system('start /min "DO NOT CLOSE This Command Prompt, Otherwise TTS Maker will be KILLED" cmd /c py ttsmake.pyw -q')

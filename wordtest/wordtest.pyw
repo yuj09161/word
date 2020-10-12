@@ -7,7 +7,7 @@ from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont,
     QRadialGradient)
 from PySide2.QtWidgets import *
 
-import os,sys,random,datetime,re
+import os,sys,random,datetime,re,argparse
 
 CURRENT_DIR=os.path.dirname(os.path.abspath(__file__))+'\\'
 sys.path.append(os.path.abspath(CURRENT_DIR+'..'))
@@ -67,13 +67,13 @@ class selectWin(QMainWindow,SelectUI):
         for dir in (WORD_DIR,RETEST_DIR):
             display=[]
             files,paths=tools.get_file(dir)
-            k=0
-            for file in files:
+            
+            for file,path in zip(files,paths):
                 if len(file)>17:
                     display.append(file[:14]+'...')
-                else: display.append(file)
-                self.__paths[file]=paths[k]
-                k+=1
+                else:
+                    display.append(file)
+                self.__paths[file]=path
             
             if mode:
                 self.__names['word']=tuple(files)
@@ -246,7 +246,6 @@ class settingWin(QDialog, SettingUI):
         else:
             settings['split']=None
         
-        print(settings)
         return settings
     
     def __cancel(self):
@@ -258,7 +257,6 @@ class settingWin(QDialog, SettingUI):
         self.close()
     
     def __start(self):
-        global selui
         self.get()
         self.close()
         selui.next()
@@ -762,9 +760,15 @@ def log(wrong,type): #log file generator
 
 
 if __name__=='__main__':
-    if '-c' in sys.argv:
+    parser=argparse.ArgumentParser()
+    parser.add_argument('-c',action='store_true')
+    parser.add_argument('-k',action='store_true')
+    
+    parsed_result=parser.parse_args()
+    
+    if parsed_result.c:
         os.system('start /min "DO NOT CLOSE This Command Prompt, Otherwise wordtest will be KILLED" cmd /c py wordtest.pyw')
-    elif '-C' in sys.argv:
+    elif parsed_result.k:
         os.system('start /min "DO NOT CLOSE This Command Prompt, Otherwise wordtest will be KILLED" cmd /k py wordtest.pyw')
     else:
         import ctypes

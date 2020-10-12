@@ -59,7 +59,8 @@ def scale(app=None,wid=None,base=1.25):
     size=scale_win.get_resol()
     return size[0]/RESOL[0]/base if -0.1<size[0]/RESOL[0]-size[1]/RESOL[1]<0.1 else 1
 
-#reconnect pyqt5/pyside2 signal
+
+#reconnect pyside2/pyqt5 signal
 #obj: must be a signal, not QObject
 def reconnect(obj,newCmd):
     try:
