@@ -27,6 +27,14 @@ class MakeUI(object):
         sizePolicy_FF.setHorizontalStretch(0)
         sizePolicy_FF.setVerticalStretch(0)
         
+        sizePolicy_PF = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        sizePolicy_PF.setHorizontalStretch(0)
+        sizePolicy_PF.setVerticalStretch(0)
+        
+        
+        sizePolicy_FP = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
+        sizePolicy_FP.setHorizontalStretch(0)
+        sizePolicy_FP.setVerticalStretch(0)
         #file select group box
         self.gbFile = QGroupBox(self.centralwidget)
         self.gbFile.setObjectName(u"fileSel")
@@ -89,19 +97,15 @@ class MakeUI(object):
         
         self.twMain.addTab(self.tFile, "File")
         
-        '''
         ##manual tab
-        
-        self.tManual = QWidget()
-        self.tManual.setObjectName(u"tManual")
-        
-        self.gbLang = QGroupBox(self.tManual)
-        self.gbLang.setObjectName(u"gbLang")
-        self.glFile=QGridLayout(self.gbFile)
-        self.glFile.setContentsMargins(2,2,2,2)
-        self.gbLang
+        self.widManual = QWidget()
+        self.widManual.setObjectName(u"widManual")
+        self.glManual=QGridLayout(self.widManual)
+        self.glManual.setContentsMargins(2,2,2,2)
         
         #Language grid
+        self.gbLang = QGroupBox(self.widManual)
+        self.gbLang.setObjectName(u"gbLang")
         self.glLang = QGridLayout(self.gbLang)
         self.glLang.setObjectName(u"glLang")
         
@@ -113,10 +117,12 @@ class MakeUI(object):
         self.rbKor.setObjectName(u"rbKor")
         self.rbKor.setChecked(True)
         self.glLang.addWidget(self.rbKor, 0, 1, 1, 1)
+        
+        self.glManual.addWidget(self.gbLang,0,0,1,1)
         #end Language
         
         #Save Destination
-        self.gbTo = QGroupBox(self.tManual)
+        self.gbTo = QGroupBox(self.widManual)
         self.gbTo.setObjectName(u"gbTo")
         self.glTo = QGridLayout(self.gbTo)
         self.glTo.setObjectName(u"glTo")
@@ -128,7 +134,6 @@ class MakeUI(object):
         
         self.rbTts = QRadioButton(self.gbTo)
         self.rbTts.setObjectName(u"rbTts")
-        self.rbTts.setEnabled(False)
         self.glTo.addWidget(self.rbTts, 0, 2, 1, 2)
 
         self.lbName = QLabel(self.gbTo)
@@ -150,30 +155,50 @@ class MakeUI(object):
         
         self.spNum = QSpinBox(self.gbTo)
         self.spNum.setObjectName(u"spinBox")
+        self.spNum.setEnabled(False)
         sizePolicy_FF.setHeightForWidth(self.spNum.sizePolicy().hasHeightForWidth())
         self.spNum.setSizePolicy(sizePolicy_FF)
+        self.spNum.setRange(1,999)
         self.glTo.addWidget(self.spNum, 1, 3, 1, 1)
         
-        self.gbTo
+        self.glManual.addWidget(self.gbTo,0,1,1,1)
         #end Save
         
         #input & make
-        self.lbText = QLabel(self.tManual)
+        self.widManualInput=QGroupBox(self.widManual)
+        self.widManualInput.setObjectName(u"widManualInput")
+        #sizePolicy_FP.setHeightForWidth(self.widManualInput.sizePolicy().hasHeightForWidth())
+        #self.widManualInput.setSizePolicy(sizePolicy_FP)
+        self.hlManualInput=QGridLayout(self.widManualInput)
+        self.hlManualInput.setContentsMargins(2,2,2,2)
+        
+        self.lbText = QLabel(self.widManualInput)
         self.lbText.setObjectName(u"lbText")
-        self.lbText
+        sizePolicy_FP.setHeightForWidth(self.lbText.sizePolicy().hasHeightForWidth())
+        self.lbText.setSizePolicy(sizePolicy_FP)
+        self.hlManualInput.addWidget(self.lbText,0,0,1,1)
         
-        self.lnToTts = QLineEdit(self.tManual)
+        #self.hlManualInput.addSpacing(50)
+        
+        self.lnToTts = QLineEdit(self.widManualInput)
         self.lnToTts.setObjectName(u"lbToTts")
-        self.lnToTts
+        sizePolicy_PF.setHeightForWidth(self.lnToTts.sizePolicy().hasHeightForWidth())
+        self.lnToTts.setSizePolicy(sizePolicy_PF)
+        self.hlManualInput.addWidget(self.lnToTts,0,1,1,1)
         
-        self.btnManual = QPushButton(self.tManual)
+        #self.hlManualInput.addSpacing(50)
+        
+        self.btnManual = QPushButton(self.widManualInput)
         self.btnManual.setObjectName(u"btnMake")
-        self.btnManual
+        sizePolicy_FF.setHeightForWidth(self.btnManual.sizePolicy().hasHeightForWidth())
+        self.btnManual.setSizePolicy(sizePolicy_FF)
+        self.hlManualInput.addWidget(self.btnManual,0,2,1,1)
+        
+        self.glManual.addWidget(self.widManualInput,1,0,1,2)
         #end
         
-        self.twMain.addTab(self.tManual, "")
-        #end Manual Make
-        '''
+        self.twMain.addTab(self.widManual, "Manual")
+        ##end Manual Make
         
         ##master log tab
         self.pteLog = QPlainTextEdit(self.twMain)
@@ -183,7 +208,7 @@ class MakeUI(object):
         self.pteLog.setReadOnly(True)
         self.twMain.addTab(self.pteLog, f"Log")
         
-        #progress bar
+        ##progress bar
         font_pg = QFont()
         font_pg.setPointSize(11)
         
@@ -199,7 +224,7 @@ class MakeUI(object):
         sizePolicy_EF.setHeightForWidth(self.pgC.sizePolicy().hasHeightForWidth())
         self.pgC.setSizePolicy(sizePolicy_EF)
         self.glMain.addWidget(self.pgC,4,1,1,2)
-        #end progress bar
+        ##end progress bar
 
         self.retranslateUi(make)
 
@@ -220,7 +245,6 @@ class MakeUI(object):
         self.lbC.setText(QCoreApplication.translate("make", u"\uc9c4\ud589\ub960:", None))
         self.pgC.setFormat(QCoreApplication.translate("make", u"%v/%m", None))
         
-        '''
         self.gbLang.setTitle(QCoreApplication.translate("make", u"Language", None))
         self.rbEng.setText(QCoreApplication.translate("make", u"English", None))
         self.rbKor.setText(QCoreApplication.translate("make", u"Korean", None))
@@ -231,8 +255,6 @@ class MakeUI(object):
         self.lbNum.setText(QCoreApplication.translate("make", u"No.", None))
         self.rbTts.setText(QCoreApplication.translate("make", u"TTS Dir", None))
         self.rbHere.setText(QCoreApplication.translate("make", u"Current Dir", None))
-        self.twMain.setTabText(1, QCoreApplication.translate("make", u"Manual", None))
-        '''
     # retranslateUi
     
     def makeTab(self,n):

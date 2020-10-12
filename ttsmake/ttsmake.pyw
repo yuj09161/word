@@ -3,7 +3,7 @@ from PySide2.QtGui import *
 from PySide2.QtWidgets import *
 
 from gtts import gTTS as tts
-import os,sys,threading
+import os,sys,threading,traceback
 from pydub import effects,AudioSegment
 from tempfile import gettempdir,_get_candidate_names
 
@@ -33,6 +33,10 @@ class Sign(QObject):
 
 class Make(MakeUI,QMainWindow):
     def __init__(self):
+        def set_enabled(enabled):
+            self.comboName.setEnabled(enabled)
+            self.spNum.setEnabled(enabled)
+        
         super().__init__()
         self.setupUi(self,SCALE)
         
@@ -48,13 +52,14 @@ class Make(MakeUI,QMainWindow):
         for k in range(THREAD_COUNT):
             self.__pte_log.append(self.makeTab(k+1))
         
-        self.btnAddAll.clicked.connect(self.__add_all)
-        self.btnAdd.clicked.connect(self.__add_file)
-        self.btnDelAll.clicked.connect(self.__del_all)
+        self.btnAddAll.clicked.connect(lambda: self.fileList.addItems(self.__names))
+        self.btnAdd.clicked.connect(lambda: self.fileList.addItem(self.__names[self.comboFile.currentIndex()]))
+        self.fileList.itemDoubleClicked.connect(lambda: self.fileList.takeItem(self.fileList.currentRow()))
+        self.btnDelAll.clicked.connect(lambda: self.fileList.clear())
         self.btnCheck.clicked.connect(self.__check)
         self.btnStart.clicked.connect(self.__process)
-        #self.btnManual.clicked.connect(self.__manual)
-        self.fileList.itemDoubleClicked.connect(self.__del_file)
+        self.btnManual.clicked.connect(self.__manual)
+        self.rbTts.toggled.connect(set_enabled)
         
     #get file lists
     def __get_file(self):
@@ -70,23 +75,7 @@ class Make(MakeUI,QMainWindow):
         self.__names=tuple(files)
         for name in display:
             self.comboFile.addItem(name)
-            #self.comboName.addItem(name)
-    
-    #add all file to fileList
-    def __add_all(self):
-        self.fileList.addItems(self.__names)
-    
-    #add file to fileList
-    def __add_file(self):
-        self.fileList.addItem(self.__names[self.comboFile.currentIndex()])
-    
-    #del file from fileList
-    def __del_file(self):
-        self.fileList.takeItem(self.fileList.currentRow())
-    
-    #del file from fileList
-    def __del_all(self):
-        self.fileList.clear()
+            self.comboName.addItem(name)
     
     #write to log widget
     def __print(self,response):
@@ -119,7 +108,6 @@ class Make(MakeUI,QMainWindow):
             QMessageBox.warning(self,'Error','No File Selected',buttons=QMessageBox.Ok)
             end()
         elif e==104:
-            self.pgC.setRange(0,1)
             end()
         else:
             raise ValueError
@@ -221,35 +209,47 @@ class Make(MakeUI,QMainWindow):
     ##manual tts maker functions
     def __manual(self):
         self.__stopped=False
-        mod=self.rbEng.isChecked()
-        if mod:
+        if self.rbEng.isChecked():
             lang_suffix='e'
-        else:
+        elif self.rbKor.isChecked():
             lang_suffix='k'
+        else:
+            raise ValueError
+        
         if self.rbHere.isChecked():
             path=CURRENT_DIR+f'out_{lang_suffix}.mp3'
         else:
-            path=(
-                SOUND_DIR+                                              #sound dir (base)
-                os.path.splitext(self.comboName.currentText()+'\\')[0]+ #word list dir
-                str(self.spNum.value())+f'_{lang_suffix}.mp3'           #file name
-            )
+            dst_dir=SOUND_DIR+os.path.splitext(self.comboName.currentText())[0]+'\\'
+            if not os.path.isdir(dst_dir):
+                os.mkdir(dst_dir)
+            path=dst_dir+str(self.spNum.value())+f'_{lang_suffix}.mp3'
+        
         self.pgC.setRange(0,0)
-        threading.Thread(target=self.__manual_worker,kwargs={'mode':mod,'text':self.lnToTts.text(),'out_path':path}).start()
+        threading.Thread(
+            target=self.__manual_worker,
+            kwargs={
+                'text'        : self.lnToTts.text(),
+                'lang_suffix' : lang_suffix,
+                'out_path'    : path
+            }
+        ).start()
     
-    def __manual_worker(self,*,mode,text,out_path):
+    def __manual_worker(self,text,lang_suffix,out_path):
+        temp_path=gettempdir()+'/'+next(_get_candidate_names())
         self.__signal.p.emit((0,f'Manual Making Start\nOutput File is {out_path}'))
         try:
-            if mode:
+            if lang_suffix=='e':
                 self.__signal.p.emit((0,'English...'))
                 self.__eng(text,out_path)
-            else:
+            elif lang_suffix=='k':
                 self.__signal.p.emit((0,'Korean...'))
-                self.__kor(text,TMPFILE)
-                effects.speedup(AudioSegment.from_mp3(TMPFILE),SPEED_K).export(out_path,format="mp3", bitrate='32k')
-                if os.path.isfile(TMPFILE):
-                    os.remove(TMPFILE)
-        except Exception as e:
+                self.__kor(text,temp_path)
+                effects.speedup(AudioSegment.from_mp3(temp_path),SPEED_K).export(out_path,format="mp3", bitrate='32k')
+                if os.path.isfile(temp_path):
+                    os.remove(temp_path)
+            else:
+                raise ValueError
+        except:
             err="".join(traceback.format_exception(*sys.exc_info))
             self.__signal.p.emit((0,f'An Error Occured\nTraceback:\n{err}'))
         else:

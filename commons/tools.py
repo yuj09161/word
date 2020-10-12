@@ -40,7 +40,7 @@ class Get_Scale(QMainWindow):
 def safe_set_path(name):
     if not os.path.isdir(name):
         os.mkdir(name)
-    return name+'\\'
+    return os.path.abspath(name)+'\\'
 
 
 def get_path(current_dir):
