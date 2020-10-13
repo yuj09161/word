@@ -5,9 +5,9 @@ from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont,
     QRadialGradient, QGuiApplication)
 from PySide2.QtWidgets import *
 
-from pygame import mixer,version
 from pydub import AudioSegment
-import os,sys,time,threading,argparse
+import os,sys,time,threading,subprocess,argparse
+from pygame import mixer,version
 
 CURRENT_DIR=os.path.dirname(os.path.abspath(__file__))+'\\'
 sys.path.append(os.path.abspath(CURRENT_DIR+'..'))
@@ -16,11 +16,10 @@ from UI import PlayUI
 from commons import tools
 
 
-USE_SAPI     = False
+PLAYER       = 0
 JMP_INTERVAL = 500    #in millisecond
 
 WORD_DIR,_,RETEST_DIR,SOUND_DIR,_,ONEFILE_DIR=tools.get_path(CURRENT_DIR)
-PYGAME_VERSION=version.vernum
 
 
 try:
@@ -30,6 +29,38 @@ except Exception as e:
     print('Error with Pygame Mixer')
     print(e)
     sys.exit(1)
+else:
+    PYGAME_VERSION=version.vernum
+
+while True:
+    if PLAYER==1:
+        break
+    if PLAYER==2:
+        break
+    if PLAYER==3:
+        break
+    else:
+        try:
+            from pygame import mixer,version
+        except ImportError:
+            try:
+                import subprocess
+                code=subprocess.run(('ffplay','-version'),stdout=subprocess.PIPE,stderr=subprocess.PIPE).returncode
+                if not code==0:
+                    raise ValueError
+            except (ImportError,ValueError):
+                try:
+                    pass
+                except:
+                    print('No player available')
+                    sys.exit(2)
+                else:
+                    PLAYER=3
+            else:
+                PLAYER=2
+        else:
+            PLAYER=1
+print(PLAYER)
 
 
 class Signal(QObject):
@@ -207,10 +238,12 @@ class PlayUI(QMainWindow,PlayUI):
     def __start(self,*,n=0):
         self.__isStop=False; self.__isPause=False
         self.btnPause.setEnabled(True)
-        if USE_SAPI:
-            threading.Thread(target=self.__play_sapi,daemon=True).start()
-        else:
+        if PLAYER==1:
             threading.Thread(target=self.__play,args=(self.__path,),kwargs={'col':n*2,'manual':False},daemon=True).start()
+        elif PLAYER==2:
+            threading.Thread(target=self.__ffplay,args=(self.__path,),kwargs={'col':n*2,'manual':False},daemon=True).start()
+        elif PLAYER==3:
+            threading.Thread(target=self.__play_sapi,daemon=True).start()
         tools.reconnect(self.btnStartStop.clicked,self.__stop)
         self.btnStartStop.setText(u'\u25a0')
     
@@ -251,7 +284,7 @@ class PlayUI(QMainWindow,PlayUI):
         self.btnStartStop.setText(u'\u25b6')
     
     #play sound process
-    def __play(self,names,*,manual=False,col=0):
+    def __play(self,names,*,col=0,manual=False,ffplay=False):
         self.__n=col; length=len(names)
         
         if manual:
@@ -278,6 +311,46 @@ class PlayUI(QMainWindow,PlayUI):
                         mixer.music.play()
                         while mixer.music.get_busy():
                             time.sleep(0.2)
+                        if not self.__isPause:
+                            if self.__n%2==1:
+                                time.sleep(0.1)
+                            self.__n+=1
+                self.__n=0; self.__r+=1
+            self.__trigger.s.emit((101,0))
+        if PYGAME_VERSION[0]>1:
+            mixer.music.unload()
+    
+    
+    #play sound process
+    def __ffplay(self,names,*,col=0,manual=False):
+        self.__n=col; length=len(names)
+        
+        if manual:
+            for k in range(2):
+                self.__trigger.s.emit((0,self.__n))
+                subprocess.run(
+                    f'ffplay {names[k]} -autoexit -nodisp -hide_banner -loglevel 0'.split(' '),
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE
+                )
+                self.__n+=1
+            self.__trigger.s.emit((102,0))
+        else:
+            self.__r=0
+            while self.__r<self.__repeat:
+                while self.__n<length:
+                    self.__trigger.s.emit((self.__r,self.__n))
+                    if self.__isStop:
+                        break
+                    elif self.__isPause:
+                        while self.__isPause:
+                            time.sleep(1)
+                    else:
+                        subprocess.run(
+                            f'ffplay {names[self.__n]} -autoexit -nodisp -hide_banner -loglevel 0'.split(' '),
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE
+                        )
                         if not self.__isPause:
                             if self.__n%2==1:
                                 time.sleep(0.1)
