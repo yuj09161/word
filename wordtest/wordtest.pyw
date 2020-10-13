@@ -712,9 +712,9 @@ def log(wrong,type): #log file generator
     
     #set prifix & file name parsing
     if ']_' in name:
-        prefix=f'[{name.split("]_")[-1]+time}]_'
+        prefix=f'[{name.split("]_")[-1]}]_{time}'
     else:
-        prefix=f'[{name+time}]_'
+        prefix=f'[{name}]_{time}'
     
     if error: #if wrong answer(s) exist
         #file generate prepare
