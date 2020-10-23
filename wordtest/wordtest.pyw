@@ -16,25 +16,24 @@ from UI import SelectUI,SettingUI,TestUI,SelectTestUI
 from commons import tools
 
 #define constant
-SHORT_ANSWER=0; CHOICE=1
-
-#define global variable
-testwin=None
-fileName=[]
-words=[]
-seq=[]
-masks={}
-settings={}
+SHORT_ANSWER = 0
+CHOICE       = 1
 
 #define setting
+SHOW_TIME=0.5
+SKIP_TIME=0.5
+TMR_INTERVAL=25
+TIME_YES=1000
+TIME_NO=50
+'''
 SHOW_TIME=1
 SKIP_TIME=2
 TMR_INTERVAL=25
 TIME_YES=1000
 TIME_NO=2000
+'''
 check_word   = ('do','sb','sth')
 ckeck_symbol = ('(','[','~','...','.')
-setting_closed=True
 
 #get dir
 WORD_DIR,LOG_DIR,RETEST_DIR,_,_,_=tools.get_path(CURRENT_DIR)
@@ -42,13 +41,14 @@ WORD_DIR,LOG_DIR,RETEST_DIR,_,_,_=tools.get_path(CURRENT_DIR)
 class selectWin(QMainWindow,SelectUI):
     def __init__(self):
         def setting():
-            if setting_closed:
+            if self.__setting_closed:
                 self.__setting.show()
             else:
                 QMessageBox.information(self,'Information','Setting Screen is already opened.')
         
         super().__init__()
         self.setupUi(self,SCALE)
+        self.__setting_closed=True
         self.__setting=settingWin(self)
         self.__get_file()
         
@@ -98,13 +98,17 @@ class selectWin(QMainWindow,SelectUI):
     
     #to test ui
     def next(self):
-        global testwin,fileName,words,seq,masks
-        mask=[]; tmp_mod=[]
-        is_split=None; start_num=0; end_num=0
+        file_names   = []
+        words        = []
+        masks        = []
+        seq          = []
+        tmp_mod      = []
+        word_to_mask = {}
+        settings     = self.__setting.get()
+        is_split     = None
         
         #parsing split
         def split(dict):
-            nonlocal start_num,end_num
             is_split=dict['split']
             if is_split:
                 size=tmp['size']
@@ -112,26 +116,25 @@ class selectWin(QMainWindow,SelectUI):
                 start=tmp['start']
                 end=tmp['end']
         
-        if setting_closed:
-            n=self.fileList.count()
-            self.__setting.get()
+        if self.__setting_closed:
+            sel_count=self.fileList.count()
             
-            mode=settings['mode']
-            if n:
-                for k in range(n):
+            if sel_count:
+                self.__setting.get()
+                mode=settings['mode']
+                for k in range(sel_count):
                     name=self.fileList.item(k).text()
-                    fileName.append(name)
-                    tmp1,tmp2=tools.parsing(self.__paths[name])
-                    words+=tmp1
+                    file_names.append(name)
+                    tmp_word,tmp_mask=tools.parsing(self.__paths[name])
+                    words+=tmp_word
                     if mode==SHORT_ANSWER:
                         if settings['pre']:
-                            mask+=tmp2
+                            masks+=tmp_mask
                         else:
-                            mask+=([[]]*len(tmp2))
+                            masks+=([[]]*len(tmp_mask))
                     else:
-                        mask+=([[]]*len(tmp2))
-                for k in range(len(words)):
-                    masks[words[k][0]]=tuple(mask[k])
+                        masks+=([[]]*len(tmp_mask))
+                    word_to_mask.update(dict(zip(tuple(eng for eng,kor in tmp_word),tmp_mask)))
                 
                 #get exam mode
                 if settings['etk']:
@@ -142,19 +145,21 @@ class selectWin(QMainWindow,SelectUI):
                 for j in tmp_mod:
                     for k in range(len(words)):
                         seq.append(str(k)+str(j))
-                for k in range(settings['shuffle']):
+                for _ in range(settings['shuffle']):
                     random.shuffle(seq)
                 
                 self.close()
+                
+                data_to_log=(file_names,words,word_to_mask)
                 if mode==SHORT_ANSWER:
-                    testwin=testWin(words,mask,seq,settings['ans'])
+                    self.__testwin=testWin(words,masks,seq,settings['show_ans'],data_to_log)
                 else:
-                    testwin=selectTestWin(words,seq,True,settings['timeout'],settings['time_show'],settings['time_sel'])
-                testwin.show()
+                    self.__testwin=selectTestWin(words,seq,True,settings['timeout'],settings['time_show'],settings['time_sel'],data_to_log)
+                self.__testwin.show()
             else:
-                QMessageBox.warning(self,'Error','No File Selected',buttons=QMessageBox.Ok)
+                QMessageBox.warning(self,'Warning','No File Selected',buttons=QMessageBox.Ok)
         else:
-            QMessageBox.warning(self,'Error','Setting screen is not closed',buttons=QMessageBox.Ok)
+            QMessageBox.warning(self,'Warning','Setting screen is not closed',buttons=QMessageBox.Ok)
 
 
 class settingWin(QDialog, SettingUI):
@@ -163,6 +168,8 @@ class settingWin(QDialog, SettingUI):
         self.setupUi(self,SCALE)
         
         self.__exam_type=SHORT_ANSWER
+        self.__setting={}
+        
         self.__short_answer()
         #self.setWindowFlags(Qt.WindowStaysOnTopHint)
         
@@ -219,22 +226,20 @@ class settingWin(QDialog, SettingUI):
             self.chkSplit.setText('Disabled')
     
     def get(self):
-        global settings
-        
         #common
-        settings['etk']=self.chkEtK.isChecked()
-        settings['kte']=self.chkKtE.isChecked()
-        settings['shuffle']=self.spinShuffle.value()
+        self.__setting['etk']=self.chkEtK.isChecked()
+        self.__setting['kte']=self.chkKtE.isChecked()
+        self.__setting['shuffle']=self.spinShuffle.value()
         
         if self.__exam_type==SHORT_ANSWER:
-            settings['mode']=SHORT_ANSWER
-            settings['pre']=self.rbPreY.isChecked()
-            settings['ans']=self.rbAnsY.isChecked()
+            self.__setting['mode']=SHORT_ANSWER
+            self.__setting['pre']=self.rbPreY.isChecked()
+            self.__setting['show_ans']=self.rbAnsY.isChecked()
         else: #exam type:choice
-            settings['mode']=CHOICE
-            settings['timeout']=self.chkTimeout.isChecked()
-            settings['time_show']=self.spinShow.value()
-            settings['time_sel']=self.spinSel.value()
+            self.__setting['mode']=CHOICE
+            self.__setting['timeout']=self.chkTimeout.isChecked()
+            self.__setting['time_show']=self.spinShow.value()
+            self.__setting['time_sel']=self.spinSel.value()
         
         if self.chkSplit.isChecked():
             tmp={}
@@ -242,11 +247,11 @@ class settingWin(QDialog, SettingUI):
             tmp['no']    = self.spinNo.value()
             tmp['start'] = self.spinStart.value()
             tmp['end']   = self.spinEnd.value()
-            settings['split']=tmp
+            self.__setting['split']=tmp
         else:
-            settings['split']=None
+            self.__setting['split']=None
         
-        return settings
+        return self.__setting
     
     def __cancel(self):
         #todo: UnDo GUI
@@ -262,25 +267,29 @@ class settingWin(QDialog, SettingUI):
         selui.next()
     
     def closeEvent(self,event):
-        global setting_closed
-        setting_closed=True
+        self.__setting_closed=True
         event.accept()
     
     def setVisible(self,var):
-        global setting_closed
         if var:
-            setting_closed=False
+            self.__setting_closed=False
             super().setVisible(True)
         else:
-            setting_closed=True
+            self.__setting_closed=True
             super().setVisible(False)
         
 
 class testWin(QMainWindow, TestUI):
-    def __init__(self,words,mask,seq,showAns):
-        self.__words=words; self.__mask=mask
-        self.__isShowAns=showAns; self.__seq=seq
-        self.__ln=(len(self.__seq),len(self.__words))
+    def __init__(self,words,mask,seq,showAns,data_to_log):
+        self.__words       = words
+        self.__mask        = mask
+        self.__isShowAns   = showAns
+        self.__seq         = seq
+        
+        self.__word_count  = len(words)
+        self.__qus_count   = len(self.__seq)
+        
+        self.__data_to_log = data_to_log
         
         super().__init__()
         self.setupUi(self,SCALE)
@@ -289,8 +298,8 @@ class testWin(QMainWindow, TestUI):
         self.__wrong={'etk':[],'kte':[]}
         
         self.__gradeChange()
-        for k in range(0,self.__ln[0]):
-            self.__addQus(self.__seq[k])
+        for seq in self.__seq:
+            self.__addQus(seq)
             self.__rb.append(None)
         
         self.btnEnd.clicked.connect(self.__check)
@@ -307,9 +316,9 @@ class testWin(QMainWindow, TestUI):
             kte='##/'
         else: kte=str(kte)+'/'
         
-        self.resT.setText(t+str(self.__ln[1]))
-        self.resEtK.setText(etk+str(self.__ln[1]))
-        self.resKtE.setText(kte+str(self.__ln[1]))
+        self.resT.setText(t+str(self.__word_count))
+        self.resEtK.setText(etk+str(self.__word_count))
+        self.resKtE.setText(kte+str(self.__word_count))
     
     def __addQus(self,seqStr):
         #parsing seqStr
@@ -349,11 +358,11 @@ class testWin(QMainWindow, TestUI):
         if txtPre:
             ans.setText(txtPre[0])
     
-    def __parsingWord(self,n):
+    def __word_at(self,n):
         return self.__words[int(self.__seq[n][:-1])]
     
     def __ansShow(self,n):
-        eng,kor=self.__parsingWord(n)
+        eng,kor=self.__word_at(n)
         
         if self.__seq[n][-1]=='0':
             txtCor=kor
@@ -381,7 +390,7 @@ class testWin(QMainWindow, TestUI):
     
     #if answer wrong
     def __no(self,n,ans=None):
-        eng,kor=self.__parsingWord(n)
+        eng,kor=self.__word_at(n)
         if ans==None:
             ans=self.__ans[n].text()
         if self.__seq[n][-1]=='0':
@@ -410,8 +419,8 @@ class testWin(QMainWindow, TestUI):
         mod=1 -> kor to eng
         '''
         end=True
-        for k in range(0,self.__ln[0]):
-            eng,kor=self.__parsingWord(k)
+        for k in range(0,self.__qus_count):
+            eng,kor=self.__word_at(k)
             ans=self.__ans[k].text()
             if self.__seq[k][-1]=='0':
                 if ans=='':
@@ -432,31 +441,26 @@ class testWin(QMainWindow, TestUI):
                     end=False
                     self.__confirm(k)
                 else:
-                    flag=True
+                    do_manual=True
                     for w in check_word:
                         if eng.endswith(w) or w+' ' in eng:
-                            flag=False
+                            do_manual=False
                             break
                     for s in ckeck_symbol:
                         if s in eng:
-                            flag=False
+                            do_manual=False
                             break
-                    if flag:
+                    if do_manual:
                         self.__no(k,ans)
                     else:
                         end=False
                         self.__confirm(k)
-                    '''
-                    if (ans.lower()==eng.lower()) or (eng.endswith('do')) or ('do ' in eng) or ('~' in eng) or ('[' in eng):
-                        end=False
-                        self.__confirm(k)
-                    else: self.__no(k,ans)
-                    '''
             if self.__isShowAns:
                 self.__ansShow(k)
         if end:
-            ln=log(self.__wrong,'basic')
-            self.__gradeChange(ln[2],ln[0],ln[1])
+            file_names,words,word_to_mask=self.__data_to_log
+            etk,kte,total,word=log(file_names,'basic',self.__wrong,words,word_to_mask)
+            self.__gradeChange(total,etk,kte)
             self.btnEnd.setText('end')
             self.btnEnd.clicked.disconnect()
             self.btnEnd.clicked.connect(self.__end)
@@ -510,8 +514,9 @@ class testWin(QMainWindow, TestUI):
                     elif chk[0].isChecked():
                         self.__yes(k)
                 k+=1
-            ln=log(self.__wrong,'basic')
-            self.__gradeChange(ln[2],ln[0],ln[1])
+            file_names,words,word_to_mask=self.__data_to_log
+            etk,kte,total,word=log(file_names,'basic',self.__wrong,words,word_to_mask)
+            self.__gradeChange(total,etk,kte)
             self.btnEnd.setText('end')
             self.btnEnd.clicked.disconnect()
             self.btnEnd.clicked.connect(self.__end)
@@ -521,7 +526,7 @@ class testWin(QMainWindow, TestUI):
         sys.exit(0)
 
 class selectTestWin(QMainWindow, SelectTestUI):
-    def __init__(self,words,seq,show_ans,is_timeout,time_show=1,time_skip=3):
+    def __init__(self,words,seq,show_ans,is_timeout,time_show,time_skip,data_to_log):
         super().__init__()
         self.setupUi(self,SCALE)
         
@@ -536,6 +541,8 @@ class selectTestWin(QMainWindow, SelectTestUI):
         
         self.__wrong       = {'etk':[],'kte':[]}
         self.__num         = 0
+        
+        self.__data_to_log = data_to_log
         
         self.pgTime.setRange(0,self.__max_time)
         self.__update()
@@ -669,12 +676,12 @@ class selectTestWin(QMainWindow, SelectTestUI):
             btn.setText('')
             btn.setStyleSheet('color: black')
     
-    def __parsingWord(self,n):
+    def __word_at(self,n):
         return self.__words[int(self.__seq[n][:-1])]
     
     #if answer wrong
     def __no(self,n,ans=''):
-        eng,kor=self.__parsingWord(n)
+        eng,kor=self.__word_at(n)
         if self.__seq[n][-1]=='0':
             if ans: 
                 self.__wrong['etk'].append((eng,kor,ans))
@@ -687,30 +694,34 @@ class selectTestWin(QMainWindow, SelectTestUI):
                 self.__wrong['kte'].append((eng,kor))
     
     def __end(self):
-        length=log(self.__wrong,'select')
-        text='''
-         All Type Wrongs: {2}/{3}         
-         English to Korean: {0}/{3}         
-         Korean to English: {1}/{3}         
-        '''.format(*length)
+        
+        file_names,words,word_to_mask=self.__data_to_log
+        etk,kte,total,word=log(file_names,'selection',self.__wrong,words,word_to_mask)
+        text=(
+            ' '*0+f'All Type Wrongs: {total}/{word}'+' '*0+'\n'+
+            ' '*0+f'English to Korean: {etk}/{word}'+' '*0+'\n'+
+            ' '*0+f'Korean to English: {kte}/{word}'+' '*0
+        )
         QMessageBox.information(self,'Wrongs',text)
         self.close()
         sys.exit(0)
     
 
-def log(wrong,type): #log file generator
+def log(file_names,exam_type,wrong,words,word_to_mask): #log file generator
     #variables
     etkOrign,kteOrign=wrong['etk'],wrong['kte']
-    time=datetime.datetime.now().strftime('%y-%m-%d_%H-%M-%S')
-    name=fileName[0].rsplit('.',1)[0]
+    name=file_names[0].rsplit('.',1)[0]
     #duplicate remove
     error=set()
-    for w in etkOrign: error.add(tuple(w[:2]))
-    for w in kteOrign: error.add(tuple(w[:2]))
+    for w in etkOrign:
+        error.add(tuple(w[:2]))
+    for w in kteOrign:
+        error.add(tuple(w[:2]))
     error=sorted(error,key=lambda x: words.index(tuple(x)))
     n=(len(etkOrign),len(kteOrign),len(error),len(words))
     
     #set prifix & file name parsing
+    time=datetime.datetime.now().strftime('%y-%m-%d_%H-%M-%S')
     if ']_' in name:
         prefix=f'[{name.split("]_")[-1]}]_{time}'
     else:
@@ -723,37 +734,42 @@ def log(wrong,type): #log file generator
         #log file generation
         with open(LOG_DIR+prefix+'.txt','w',encoding='utf-8') as file:
             #log exam type
-            file.write(f'--------Exam Type: {type}--------\n')
+            file.write(f'--------Exam Type: {exam_type}--------\n')
+            
             #log exam file(s)
             file.write('-----------Exam File(s)-----------\n')
-            for name in fileName:
+            for name in file_names:
                 file.write(name+'\n')
+            
             #log all type wrong(s)
             file.write(f'\n----------All type Wrongs----------\nTotal Wrong: {n[2]}/{n[3]}\n')
             for w in error:
                 file.write(' / '.join(w)+'\n')
+            
             #log wrong(s) english to korean
             file.write(f'\n----------English to Korean----------\nwrong: {n[0]}/{n[3]}\n')
             for w in etk:
                 file.write(' / '.join(w)+'\n')
+
             #log wrong(s) korean to english
             file.write(f'\n----------Korean to English----------\nwrong: {n[1]}/{n[3]}\n')
             for w in kte:
                 w=list(w)
                 w[0],w[1]=w[1],w[0]
                 file.write(' / '.join(w)+'\n')
-        #re-test file generator
+        
+        #generate re-test file
         with open(RETEST_DIR+prefix+'.csv','w',encoding='utf-8') as file:
             for w in error:
-                mask=masks[w[0]]
+                mask=word_to_mask[w[0]]
                 file.write('\t'.join(w+mask)+'\n')
     else:
         with open(LOG_DIR+prefix+'.txt','w',encoding='utf-8') as file:
             #log exam type
-            file.write(f'--------Exam Type: {type}--------\n')
+            file.write(f'--------Exam Type: {exam_type}--------\n')
             #log exam file(s)
             file.write('----------Exam File(s)----------\n')
-            for name in fileName:
+            for name in file_name:
                 file.write(name+'\n')
             file.write('\nNo Error')
     return n
