@@ -164,7 +164,8 @@ class PlayUI(QMainWindow,PlayUI):
             j=0
             for word in self.__words:
                 for k in range(2):
-                    self.twWord.setItem(j,k,QTableWidgetItem(word[k]))
+                    item=QTableWidgetItem(word[k])
+                    self.twWord.setItem(j,k,item)
                 j+=1
             
             #resizing columns

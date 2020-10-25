@@ -82,6 +82,7 @@ class MakeUI(object):
         self.tFile.setObjectName(u"tFile")
         self.glFile=QGridLayout(self.tFile)
         self.glFile.setContentsMargins(2,2,2,2)
+        self.glFile.setVerticalSpacing(2)
         
         self.fileList = QListWidget(self.tFile)
         self.fileList.setObjectName(u"fileList")

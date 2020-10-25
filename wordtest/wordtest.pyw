@@ -20,6 +20,7 @@ SHORT_ANSWER = 0
 CHOICE       = 1
 
 #define setting
+'''
 SHOW_TIME=0.5
 SKIP_TIME=0.5
 TMR_INTERVAL=25
@@ -31,7 +32,7 @@ SKIP_TIME=2
 TMR_INTERVAL=25
 TIME_YES=1000
 TIME_NO=2000
-'''
+
 check_word   = ('do','sb','sth')
 ckeck_symbol = ('(','[','~','...','.')
 

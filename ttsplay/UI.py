@@ -46,21 +46,23 @@ class PlayUI(object):
         ##main table view
         self.twWord = QTableWidget(Dialog)
         self.twWord.setColumnCount(2)
+        
+        self.twWord.setObjectName(u"twWord")
+        self.twWord.setGeometry(QRect(20*SCALE, 90*SCALE, 700*SCALE, 411*SCALE))
+        
+        self.twWord.setFocusPolicy(Qt.NoFocus)
+        self.twWord.setStyleSheet('selection-background-color:#f0f0f0;selection-color: black;')
+        self.twWord.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.twWord.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.twWord.setGridStyle(Qt.SolidLine)
+        self.twWord.setSortingEnabled(False)
+        self.twWord.setEditTriggers(QAbstractItemView.NoEditTriggers)
             
         __qtablewidgetitem = QTableWidgetItem()
         self.twWord.setHorizontalHeaderItem(0, __qtablewidgetitem)
         
         __qtablewidgetitem1 = QTableWidgetItem()
         self.twWord.setHorizontalHeaderItem(1, __qtablewidgetitem1)
-        
-        self.twWord.setObjectName(u"twWord")
-        self.twWord.setGeometry(QRect(20*SCALE, 90*SCALE, 700*SCALE, 411*SCALE))
-        
-        self.twWord.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
-        self.twWord.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        self.twWord.setGridStyle(Qt.SolidLine)
-        self.twWord.setSortingEnabled(False)
-        self.twWord.setEditTriggers(QAbstractItemView.NoEditTriggers)
         ##end main table view
         
         ##bottom
