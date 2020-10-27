@@ -8,7 +8,7 @@ from PySide2.QtWidgets import *
 class MakeUI(object):
     def setupUi(self, make, SCALE):
         #set size
-        make.setFixedSize(640*SCALE, 480*SCALE)
+        make.setFixedSize(500*SCALE, 375*SCALE)
         
         self.centralwidget=QWidget(self)
         make.setCentralWidget(self.centralwidget)

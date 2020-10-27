@@ -250,7 +250,7 @@ class Make(MakeUI,QMainWindow):
             else:
                 raise ValueError
         except:
-            err="".join(traceback.format_exception(*sys.exc_info))
+            err="".join(traceback.format_exception(*sys.exc_info()))
             self.__signal.p.emit((0,f'An Error Occured\nTraceback:\n{err}'))
         else:
             self.__signal.p.emit((0,'Well Done'))
@@ -286,7 +286,7 @@ if __name__=='__main__':
         app=QApplication()
         app.setWindowIcon(QIcon(CURRENT_DIR+'icon.png'))
         
-        SCALE=tools.scale(app.desktop)
+        SCALE=tools.scale(app.desktop,base=1)
         
         make=Make()
         make.show()

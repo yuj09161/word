@@ -54,7 +54,7 @@ def get_path(current_dir):
     return (WORD_DIR,LOG_DIR,RETEST_DIR,SOUND_DIR,TTS_DIR,ONEFILE_DIR)
 
 
-def scale(app=None,wid=None,base=1.25):
+def scale(app=None,wid=None,*,base=1.25):
     scale_win=Get_Scale(app,wid)
     size=scale_win.get_resol()
     return size[0]/RESOL[0]/base if -0.1<size[0]/RESOL[0]-size[1]/RESOL[1]<0.1 else 1
